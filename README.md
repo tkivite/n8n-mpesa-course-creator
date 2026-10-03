@@ -60,6 +60,7 @@ It is **not** the student-facing repo.
 - Access control : `docs/access-control.md`
 - Release checklist : `docs/release-checklist.md`
 - Gumroad product copy : `docs/gumroad-product-copy.md`
+- Gumroad setup checklist : `docs/gumroad-setup-checklist.md`
 - Thumbnail and lesson naming guide : `docs/thumbnail-and-lesson-naming-guide.md`
 - Video production playbook : `docs/video-production-playbook.md`
 - Voiceover scripts : `docs/scripts/`

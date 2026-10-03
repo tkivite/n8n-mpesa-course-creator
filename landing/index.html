@@ -126,7 +126,7 @@
       Four visual workflows replace a custom backend service.
     </p>
     <div class="cta-row">
-      <a href="#pricing" class="btn btn-primary">Enroll · from $29</a>
+      <a href="https://gumroad.com/l/REPLACE_PRO" class="btn btn-primary" data-checkout="pro" target="_blank" rel="noopener noreferrer">Enroll · from $29</a>
       <a href="#deliverables" class="btn btn-ghost">See what you get →</a>
     </div>
     <div class="proof">10 modules · 6.5 hours of lessons · Postman collection, SQL schemas, VPS deploy script, PDF handbook</div>
@@ -216,7 +216,7 @@
           <li>Student quickstart + platform setup docs</li>
           <li>Community access</li>
         </ul>
-        <a href="#" class="btn btn-ghost">Buy Starter</a>
+        <a href="https://gumroad.com/l/REPLACE_STARTER" class="btn btn-ghost" data-checkout="starter" target="_blank" rel="noopener noreferrer">Buy Starter</a>
       </div>
       <div class="tier popular">
         <h3>Pro</h3>
@@ -229,7 +229,7 @@
           <li>Docker starter, SQL schema, and deploy files</li>
           <li>All five use-case workflow templates</li>
         </ul>
-        <a href="#" class="btn btn-primary">Buy Pro</a>
+        <a href="https://gumroad.com/l/REPLACE_PRO" class="btn btn-primary" data-checkout="pro" target="_blank" rel="noopener noreferrer">Buy Pro</a>
       </div>
       <div class="tier">
         <h3>Agency</h3>
@@ -242,7 +242,7 @@
           <li>Sales, onboarding, and proposal templates</li>
           <li>Premium creator-side playbooks and support material</li>
         </ul>
-        <a href="#" class="btn btn-ghost">Buy Agency</a>
+        <a href="https://gumroad.com/l/REPLACE_AGENCY" class="btn btn-ghost" data-checkout="agency" target="_blank" rel="noopener noreferrer">Buy Agency</a>
       </div>
     </div>
     <p style="color: var(--muted); font-size: 13px; text-align: center; margin-top: 24px;">
@@ -282,6 +282,22 @@
     </div>
   </div>
 </section>
+
+<script>
+  // Replace these three URLs with your real Gumroad / Lemon Squeezy / Paystack checkout links.
+  // The buttons above are wired with data-checkout="starter|pro|agency" so you only edit URLs here.
+  const CHECKOUT_LINKS = {
+    starter: 'https://gumroad.com/l/REPLACE_STARTER',
+    pro: 'https://gumroad.com/l/REPLACE_PRO',
+    agency: 'https://gumroad.com/l/REPLACE_AGENCY'
+  };
+
+  for (const el of document.querySelectorAll('[data-checkout]')) {
+    const tier = el.getAttribute('data-checkout');
+    const url = CHECKOUT_LINKS[tier];
+    if (url) el.href = url;
+  }
+</script>
 
 <footer>
   <div class="wrap">
