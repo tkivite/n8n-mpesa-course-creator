@@ -4,6 +4,8 @@
 
 This privacy policy explains how information is collected, used, and protected in connection with **n8n M-Pesa Mastery**, its sales pages, checkout flows, private repository access process, and support operations.
 
+This course is offered by **iTik Solutions**.
+
 > This is a practical course-business privacy policy template and should be reviewed for your exact legal and tax setup before public launch.
 
 ---
@@ -160,6 +162,7 @@ The latest version should always be the one published on the current landing pag
 
 For privacy-related questions or requests:
 
-- **Email:** `support@yourcourse.co.ke`
+- **Contact:** `https://itiksolutions.com/contact`
 - **Product:** `n8n M-Pesa Mastery`
+
 

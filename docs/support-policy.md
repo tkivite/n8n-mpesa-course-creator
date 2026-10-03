@@ -4,6 +4,8 @@
 
 This support policy explains what buyers of **n8n M-Pesa Mastery** can expect when asking for help.
 
+This course is offered by **iTik Solutions**.
+
 ---
 
 ## 1. Supported platforms
@@ -22,7 +24,7 @@ The course is built around Git, Docker, a browser, Postman, and local configurat
 
 Primary support contact:
 
-- **Email:** `support@yourcourse.co.ke`
+- **Contact:** `https://itiksolutions.com/contact`
 
 Optional community support:
 
@@ -142,6 +144,7 @@ Update access depends on the tier and the original purchase rights offered at ch
 
 For support requests:
 
-- **Email:** `support@yourcourse.co.ke`
+- **Contact:** `https://itiksolutions.com/contact`
 - **Product:** `n8n M-Pesa Mastery`
+
 

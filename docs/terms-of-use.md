@@ -4,6 +4,8 @@
 
 These terms govern the purchase and use of **n8n M-Pesa Mastery**, including related videos, PDFs, workflow files, templates, private repository access, and supporting materials.
 
+This course is offered by **iTik Solutions**.
+
 > This is an operational terms template for the course business and should be reviewed and adapted for your exact legal setup before public launch.
 
 ---
@@ -192,6 +194,7 @@ Placeholder example:
 
 For questions about these terms:
 
-- **Email:** `support@yourcourse.co.ke`
+- **Contact:** `https://itiksolutions.com/contact`
 - **Product:** `n8n M-Pesa Mastery`
+
 

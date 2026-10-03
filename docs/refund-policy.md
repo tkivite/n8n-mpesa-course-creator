@@ -4,6 +4,8 @@
 
 This refund policy applies to digital purchases of **n8n M-Pesa Mastery** and any related downloadable assets, including videos, PDFs, workflow JSON files, templates, and private repository access.
 
+This course is offered by **iTik Solutions**.
+
 ---
 
 ## 1. Summary
@@ -63,9 +65,11 @@ If you downloaded files before the refund, you must stop using them after the re
 
 ## 6. How to request a refund
 
-Send an email to:
+Contact:
 
-**support@yourcourse.co.ke**
+**iTik Solutions**
+
+`https://itiksolutions.com/contact`
 
 Include:
 
@@ -107,6 +111,7 @@ Refund handling for upgrades may be reviewed case by case.
 
 For refund requests or billing questions:
 
-- **Email:** `support@yourcourse.co.ke`
+- **Contact:** `https://itiksolutions.com/contact`
 - **Product:** `n8n M-Pesa Mastery`
+
 
