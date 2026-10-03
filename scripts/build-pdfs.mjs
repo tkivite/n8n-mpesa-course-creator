@@ -136,7 +136,7 @@ async function renderDoc(chrome, { src, out, title, subtitle, cover }) {
 
 const DOCS_TO_BUILD = [
   { src: 'handbook.md',           out: 'handbook.pdf',
-    title: 'n8n M-Pesa Mastery',  subtitle: 'Build STK Push Payment Workflows — No Code', cover: true },
+    title: 'n8n M-Pesa Mastery',  subtitle: 'Build Production-Ready STK Push Payment Workflows - No Backend code', cover: true },
   { src: 'daraja-cheatsheet.md',  out: 'daraja-cheatsheet.pdf',
     title: 'Daraja API Cheat Sheet', subtitle: 'One-page reference', cover: true },
   { src: 'go-live-checklist.md',  out: 'go-live-checklist.pdf',

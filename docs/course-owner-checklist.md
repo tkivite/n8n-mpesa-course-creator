@@ -37,6 +37,13 @@ Before recording or launching, lock these down.
 - [ ] Final support policy written
 - [ ] Final launch date chosen
 
+### Current frozen decisions
+
+- **Course title** : `n8n M-Pesa Mastery`
+- **Subtitle** : `Build Production-Ready STK Push Payment Workflows - No Backend code`
+- **Pricing tiers** : `Starter · Pro · Agency`
+- **Target launch date** : `2026-10-15`
+
 ### Tier contents
 
 - [ ] Decide which tiers include videos
