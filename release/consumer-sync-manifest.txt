@@ -1,0 +1,11 @@
+# source|destination   (paths are relative to repo roots)
+LICENSE|LICENSE
+
+# Shared PDFs and their editable markdown sources
+/docs/handbook.md|/docs/handbook.md
+/docs/handbook.pdf|/docs/handbook.pdf
+/docs/daraja-cheatsheet.md|/docs/daraja-cheatsheet.md
+/docs/daraja-cheatsheet.pdf|/docs/daraja-cheatsheet.pdf
+/docs/go-live-checklist.md|/docs/go-live-checklist.md
+/docs/go-live-checklist.pdf|/docs/go-live-checklist.pdf
+

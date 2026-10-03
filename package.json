@@ -8,7 +8,8 @@
     "build:pdf": "node scripts/build-pdfs.mjs",
     "build:voiceover": "node scripts/extract-voiceover.mjs",
     "validate:workflows": "node scripts/validate-workflows.mjs",
-    "revoke:access": "node scripts/revoke-access.mjs"
+    "revoke:access": "node scripts/revoke-access.mjs",
+    "publish:consumer": "bash scripts/publish-consumer.sh"
   },
   "dependencies": {
     "pg": "^8.13.1"

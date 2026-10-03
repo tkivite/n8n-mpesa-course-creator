@@ -58,6 +58,7 @@ It is **not** the student-facing repo.
 
 - Owner checklist : `docs/course-owner-checklist.md`
 - Access control : `docs/access-control.md`
+- Release checklist : `docs/release-checklist.md`
 - Voiceover scripts : `docs/scripts/`
 - PDF build docs : `docs/BUILDING.md`
 
@@ -70,7 +71,17 @@ npm install
 npm run validate:workflows
 npm run build:voiceover
 npm run build:pdf
+npm run publish:consumer
 ```
+
+### Creator → consumer publish flow
+
+```bash
+npm run publish:consumer -- --dry-run
+npm run publish:consumer
+```
+
+That syncs the creator-owned public docs listed in `release/consumer-sync-manifest.txt` into the consumer repo.
 
 ---
 
@@ -79,4 +90,5 @@ npm run build:pdf
 Student-facing content should live in the **consumer repo**:
 
 - `../n8n-mpesa-course-consumer`
+
 

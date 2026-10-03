@@ -13,7 +13,7 @@
  *
  * Required env:
  *   GH_REPO_OWNER       e.g. "tkivite"
- *   GH_REPO_NAME        e.g. "n8n-mpesa-course"
+ *   GH_REPO_NAME        e.g. "n8n-mpesa-course-consumer"
  *   GH_ADMIN_TOKEN      fine-grained PAT with "Administration: Read & Write" on the repo
  *   DATABASE_URL        postgres://user:pass@host:5432/db
  */

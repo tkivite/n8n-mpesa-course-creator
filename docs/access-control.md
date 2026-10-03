@@ -43,6 +43,10 @@ Plus:
 | `landing/repo-access.html` | Buyer-facing form (plain HTML, no build) |
 | `scripts/revoke-access.mjs` | CLI for manual revocation (chargebacks, policy violations) |
 
+> In the split-repo setup, buyers are granted access to the **consumer repo**:
+>
+> `tkivite/n8n-mpesa-course-consumer`
+
 ---
 
 ## 🚀 Setup (one-time, ~30 min)
@@ -65,7 +69,7 @@ Or copy `db/access.sql` next to `db/schema.sql` and bounce the Postgres containe
 
 1. GitHub → Settings → Developer settings → Personal access tokens → **Fine-grained tokens**
 2. **Resource owner**: your username (or the org that owns the repo)
-3. **Repository access**: Only select repositories → pick `n8n-mpesa-course`
+3. **Repository access**: Only select repositories → pick `n8n-mpesa-course-consumer`
 4. **Permissions** (repository):
    - `Administration` → **Read and write** (required to invite/remove collaborators)
    - `Metadata` → Read only (auto-included)
@@ -76,7 +80,7 @@ Or copy `db/access.sql` next to `db/schema.sql` and bounce the Postgres containe
 ```bash
 # --- Course access control ---
 GH_REPO_OWNER=tkivite
-GH_REPO_NAME=n8n-mpesa-course
+GH_REPO_NAME=n8n-mpesa-course-consumer
 GH_ADMIN_TOKEN=ghp_your_fine_grained_token
 
 GUMROAD_WEBHOOK_SECRET=any-random-string-you-want
@@ -144,7 +148,7 @@ For edge cases (chargebacks outside Gumroad, policy violations, agency seat tran
 ```bash
 # Revoke one user
 GH_REPO_OWNER=tkivite \
-GH_REPO_NAME=n8n-mpesa-course \
+GH_REPO_NAME=n8n-mpesa-course-consumer \
 GH_ADMIN_TOKEN=ghp_... \
 DATABASE_URL=postgres://n8n:n8n@localhost:5432/n8n \
   node scripts/revoke-access.mjs --user some-github-handle --reason "chargeback"

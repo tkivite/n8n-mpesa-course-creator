@@ -8,7 +8,7 @@ Single-file static landing page. Open `index.html` in a browser.
 Drag the `landing/` folder onto netlify.com/drop — live in 30 seconds. Same with vercel.com.
 
 ### GitHub Pages
-Settings → Pages → Branch: `main`, Folder: `/landing`. Live at `https://<username>.github.io/n8n-mpesa-course/`.
+Settings → Pages → Branch: `main`, Folder: `/landing`. Live at `https://<username>.github.io/n8n-mpesa-course-creator/`.
 
 ### Cloudflare Pages
 Create a project pointing at this repo, set build output directory to `landing`. Live on your Cloudflare domain.

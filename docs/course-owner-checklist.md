@@ -442,6 +442,7 @@ Use this section as the final gate.
 - Linux setup : `docs/platform-setup-linux.md`
 - Troubleshooting : `docs/troubleshooting.md`
 - Access-control guide : `docs/access-control.md`
+- Release checklist : `docs/release-checklist.md`
 - Handbook : `docs/handbook.pdf`
 - Cheat sheet : `docs/daraja-cheatsheet.pdf`
 - Go-live checklist : `docs/go-live-checklist.pdf`
