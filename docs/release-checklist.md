@@ -81,6 +81,20 @@ This syncs the files listed in:
 
 - `release/consumer-sync-manifest.txt`
 
+### Optional : one-command sync + commit + push
+
+```bash
+cd /Users/tituskivite/Projects/mpesa-v3/n8n-mpesa-course-creator
+bash scripts/publish-consumer.sh --commit --push
+```
+
+That will:
+
+1. sync the manifest files
+2. enter the consumer repo
+3. commit any resulting changes
+4. push them to `origin/main`
+
 ---
 
 ## 5. Review and commit in the consumer repo

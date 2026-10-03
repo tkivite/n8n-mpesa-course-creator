@@ -11,6 +11,9 @@ set -euo pipefail
 #   bash scripts/publish-consumer.sh /absolute/path/to/n8n-mpesa-course-consumer
 #   bash scripts/publish-consumer.sh --dry-run
 #   bash scripts/publish-consumer.sh /path/to/consumer --dry-run
+#   bash scripts/publish-consumer.sh --commit
+#   bash scripts/publish-consumer.sh --commit --push
+#   bash scripts/publish-consumer.sh --commit --message "chore: sync shared docs"
 #
 # Notes:
 #   - This script intentionally syncs only a small, explicit manifest of files.
@@ -24,13 +27,39 @@ MANIFEST="$CREATOR_ROOT/release/consumer-sync-manifest.txt"
 
 TARGET="$DEFAULT_TARGET"
 DRY_RUN="false"
+AUTO_COMMIT="false"
+AUTO_PUSH="false"
+COMMIT_MESSAGE="chore: sync shared docs from creator repo"
 
-for arg in "$@"; do
-  case "$arg" in
-    --dry-run) DRY_RUN="true" ;;
-    *) TARGET="$arg" ;;
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --dry-run)
+      DRY_RUN="true"
+      shift
+      ;;
+    --commit)
+      AUTO_COMMIT="true"
+      shift
+      ;;
+    --push)
+      AUTO_PUSH="true"
+      shift
+      ;;
+    --message)
+      COMMIT_MESSAGE="$2"
+      shift 2
+      ;;
+    *)
+      TARGET="$1"
+      shift
+      ;;
   esac
 done
+
+if [[ "$AUTO_PUSH" == "true" && "$AUTO_COMMIT" != "true" ]]; then
+  echo "--push requires --commit" >&2
+  exit 1
+fi
 
 if [[ ! -d "$TARGET" ]]; then
   echo "Target consumer repo not found: $TARGET" >&2
@@ -51,6 +80,8 @@ echo "Creator root : $CREATOR_ROOT"
 echo "Consumer repo: $TARGET"
 echo "Manifest     : $MANIFEST"
 echo "Dry run      : $DRY_RUN"
+echo "Auto commit  : $AUTO_COMMIT"
+echo "Auto push    : $AUTO_PUSH"
 echo
 
 copy_count=0
@@ -85,10 +116,33 @@ if [[ "$DRY_RUN" == "true" ]]; then
   echo "Dry run complete. $copy_count file mappings checked."
 else
   echo "Publish complete. $copy_count files synced into the consumer repo."
-  echo "Next suggested steps:"
-  echo "  1. cd '$TARGET'"
-  echo "  2. git status"
-  echo "  3. git add -A && git commit -m 'chore: sync shared docs from creator repo'"
-  echo "  4. git push"
+
+  if [[ "$AUTO_COMMIT" == "true" ]]; then
+    if [[ ! -d "$TARGET/.git" ]]; then
+      echo "Cannot auto-commit: target is not a git repo: $TARGET" >&2
+      exit 1
+    fi
+
+    pushd "$TARGET" >/dev/null
+    if [[ -n "$(git status --porcelain)" ]]; then
+      git add -A
+      git commit -m "$COMMIT_MESSAGE"
+      echo "Auto-commit complete."
+
+      if [[ "$AUTO_PUSH" == "true" ]]; then
+        git push
+        echo "Auto-push complete."
+      fi
+    else
+      echo "No consumer changes detected after sync; nothing to commit."
+    fi
+    popd >/dev/null
+  else
+    echo "Next suggested steps:"
+    echo "  1. cd '$TARGET'"
+    echo "  2. git status"
+    echo "  3. git add -A && git commit -m '$COMMIT_MESSAGE'"
+    echo "  4. git push"
+  fi
 fi
 

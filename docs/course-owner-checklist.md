@@ -464,6 +464,8 @@ Use this section as the final gate.
 - Troubleshooting : `docs/troubleshooting.md`
 - Access-control guide : `docs/access-control.md`
 - Release checklist : `docs/release-checklist.md`
+- Gumroad product copy : `docs/gumroad-product-copy.md`
+- Thumbnail and lesson naming guide : `docs/thumbnail-and-lesson-naming-guide.md`
 - Video production playbook : `docs/video-production-playbook.md`
 - Handbook : `docs/handbook.pdf`
 - Cheat sheet : `docs/daraja-cheatsheet.pdf`
