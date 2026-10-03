@@ -1,6 +1,6 @@
 # Building the Course PDFs
 
-The handbook, cheat sheet, go-live checklist, and course-owner checklist live as **Markdown** in `docs/` so they're easy to edit and diff. They're rendered to PDF via a tiny Node script that uses the Google Chrome you already have installed — **no Pandoc, no LaTeX, no Puppeteer download**.
+The handbook, cheat sheet, go-live checklist, course-owner checklist, and public policy documents live as **Markdown** in `docs/` so they're easy to edit and diff. They're rendered to PDF via a tiny Node script that uses the Google Chrome you already have installed — **no Pandoc, no LaTeX, no Puppeteer download**.
 
 ## Prerequisites
 
@@ -21,6 +21,10 @@ docs/handbook.pdf           (~10 pages, course handbook)
 docs/daraja-cheatsheet.pdf  (~5 pages, API reference)
 docs/go-live-checklist.pdf  (~4 pages, production checklist)
 docs/course-owner-checklist.pdf  (owner launch + QA checklist)
+docs/refund-policy.pdf      (public refund policy)
+docs/support-policy.pdf     (public support policy)
+docs/privacy-policy.pdf     (public privacy policy)
+docs/terms-of-use.pdf       (public terms of purchase and use)
 ```
 
 ## Customising

@@ -143,6 +143,14 @@ const DOCS_TO_BUILD = [
     title: 'Go-Live Checklist',   subtitle: 'M-Pesa STK Push on n8n', cover: true },
   { src: 'course-owner-checklist.md', out: 'course-owner-checklist.pdf',
     title: 'Course Owner Checklist', subtitle: 'Launch, QA, support, and platform-readiness guide', cover: true },
+  { src: 'refund-policy.md', out: 'refund-policy.pdf',
+    title: 'Refund Policy', subtitle: 'n8n M-Pesa Mastery', cover: true },
+  { src: 'support-policy.md', out: 'support-policy.pdf',
+    title: 'Support Policy', subtitle: 'n8n M-Pesa Mastery', cover: true },
+  { src: 'privacy-policy.md', out: 'privacy-policy.pdf',
+    title: 'Privacy Policy', subtitle: 'n8n M-Pesa Mastery', cover: true },
+  { src: 'terms-of-use.md', out: 'terms-of-use.pdf',
+    title: 'Terms of Purchase and Use', subtitle: 'n8n M-Pesa Mastery', cover: true },
 ];
 
 async function main() {

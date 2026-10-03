@@ -61,6 +61,10 @@ It is **not** the student-facing repo.
 - Release checklist : `docs/release-checklist.md`
 - Gumroad product copy : `docs/gumroad-product-copy.md`
 - Gumroad setup checklist : `docs/gumroad-setup-checklist.md`
+- Refund policy : `docs/refund-policy.md`
+- Support policy : `docs/support-policy.md`
+- Privacy policy : `docs/privacy-policy.md`
+- Terms of use : `docs/terms-of-use.md`
 - Thumbnail and lesson naming guide : `docs/thumbnail-and-lesson-naming-guide.md`
 - Video production playbook : `docs/video-production-playbook.md`
 - Voiceover scripts : `docs/scripts/`

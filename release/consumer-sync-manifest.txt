@@ -8,4 +8,12 @@ LICENSE|LICENSE
 /docs/daraja-cheatsheet.pdf|/docs/daraja-cheatsheet.pdf
 /docs/go-live-checklist.md|/docs/go-live-checklist.md
 /docs/go-live-checklist.pdf|/docs/go-live-checklist.pdf
+/docs/refund-policy.md|/docs/refund-policy.md
+/docs/refund-policy.pdf|/docs/refund-policy.pdf
+/docs/support-policy.md|/docs/support-policy.md
+/docs/support-policy.pdf|/docs/support-policy.pdf
+/docs/privacy-policy.md|/docs/privacy-policy.md
+/docs/privacy-policy.pdf|/docs/privacy-policy.pdf
+/docs/terms-of-use.md|/docs/terms-of-use.md
+/docs/terms-of-use.pdf|/docs/terms-of-use.pdf
 
