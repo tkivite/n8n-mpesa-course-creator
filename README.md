@@ -59,6 +59,7 @@ It is **not** the student-facing repo.
 - Owner checklist : `docs/course-owner-checklist.md`
 - Access control : `docs/access-control.md`
 - Release checklist : `docs/release-checklist.md`
+- Video production playbook : `docs/video-production-playbook.md`
 - Voiceover scripts : `docs/scripts/`
 - PDF build docs : `docs/BUILDING.md`
 

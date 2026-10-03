@@ -44,6 +44,20 @@ Before recording or launching, lock these down.
 - **Pricing tiers** : `Starter · Pro · Agency`
 - **Target launch date** : `2026-10-15`
 
+### Checkout / Gumroad product names
+
+Use these exact names in Gumroad, Lemon Squeezy, Paystack checkout copy, and launch posts:
+
+- **Starter** : `n8n M-Pesa Mastery : Starter`
+- **Pro** : `n8n M-Pesa Mastery : Pro`
+- **Agency** : `n8n M-Pesa Mastery : Agency`
+
+Suggested positioning:
+
+- **Starter** : videos + PDFs + community access
+- **Pro** : Starter + private consumer repo + workflows + Postman + deploy files
+- **Agency** : Pro + creator-oriented commercial guidance, white-label material, and premium support
+
 ### Tier contents
 
 - [ ] Decide which tiers include videos
@@ -450,6 +464,7 @@ Use this section as the final gate.
 - Troubleshooting : `docs/troubleshooting.md`
 - Access-control guide : `docs/access-control.md`
 - Release checklist : `docs/release-checklist.md`
+- Video production playbook : `docs/video-production-playbook.md`
 - Handbook : `docs/handbook.pdf`
 - Cheat sheet : `docs/daraja-cheatsheet.pdf`
 - Go-live checklist : `docs/go-live-checklist.pdf`

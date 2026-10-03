@@ -1,5 +1,7 @@
 # n8n M-Pesa Mastery : Course Handbook
 
+> **Build Production-Ready STK Push Payment Workflows - No Backend code**
+
 > This Markdown file is the master draft. Export to PDF via **Pandoc** or **Typora**:
 >
 > ```bash
@@ -27,7 +29,7 @@
 
 ## Welcome
 
-**What you'll build:** a production-ready M-Pesa STK Push integration using n8n — no backend microservice required. By the end of this course you'll have:
+**What you'll build:** production-ready STK Push payment workflows using n8n, with no custom backend service required. By the end of this course you'll have:
 
 - A self-hosted n8n instance behind HTTPS
 - 4 core workflows (auth, STK push, callback, reconciliation)
