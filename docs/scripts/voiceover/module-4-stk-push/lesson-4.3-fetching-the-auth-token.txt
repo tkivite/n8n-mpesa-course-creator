@@ -1,0 +1,15 @@
+# Lesson 4.3 : Fetching the auth token
+# Target runtime: 4 min
+# Word count: ~237
+# Paste the lines below into ElevenLabs / Murf.
+# <break time="Ns" /> tags are ElevenLabs SSML.
+
+This is the shortest lesson in the module. Add an Execute Workflow node after Validate Input. Workflow dropdown: pick zero-one dash M dash Pesa auth, the one we built in module three. Save. Done.
+
+Trigger a test request. The Execute Workflow node runs the auth sub-workflow, which — thanks to our caching — probably hits the cache and returns a token in milliseconds. The token appears in the node's output panel. <break time="1s" /> From here, downstream nodes reference the token with dollar json dot access_token. We'll use that in the next lesson to build the Authorization header.
+
+One thing to think about: what if auth fails? Say your Consumer Secret rotated and the sub-workflow throws. By default, the Execute Workflow node propagates the error, your main workflow stops, and the webhook returns five hundred to the frontend. <break time="1s" /> That's the right behavior for payments. Don't try to push an STK with a bad token — you'll just confuse the customer. Fail loud, let your frontend show "payment temporarily unavailable", and alert ops to fix the credentials.
+
+If you really want graceful degradation, you can set the Execute Workflow node to "continue on error" in Settings. Then route the error output to a Code node that returns a custom error response. For a course demo I keep it simple — propagate.
+
+Next up: the big one. The timestamp, the password, the twelve-field payload. See you there.

@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Claim your course repo access · n8n M-Pesa Mastery</title>
+  <meta name="robots" content="noindex" />
+  <style>
+    :root { --bg:#0f1115; --panel:#171a21; --fg:#e9edf3; --muted:#9aa3b2; --accent:#2fbf71; --border:#262a33; --danger:#ff5a5a; }
+    * { box-sizing: border-box; }
+    body { margin:0; padding:0; background:var(--bg); color:var(--fg); font-family:-apple-system,"Segoe UI",Arial,sans-serif; line-height:1.5; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:40px 20px; }
+    .card { background:var(--panel); border:1px solid var(--border); border-radius:16px; padding:40px; max-width:520px; width:100%; }
+    h1 { margin:0 0 8px; font-size:26px; letter-spacing:-.01em; }
+    p.lede { color:var(--muted); margin:0 0 28px; font-size:15px; }
+    label { display:block; margin-bottom:6px; font-size:14px; font-weight:600; color:var(--fg); }
+    .hint { color:var(--muted); font-size:12px; font-weight:400; margin-left:6px; }
+    input[type=text] { width:100%; padding:12px 14px; border-radius:10px; border:1px solid var(--border); background:#0b0d12; color:var(--fg); font-size:15px; font-family:ui-monospace,Menlo,monospace; }
+    input[type=text]:focus { outline:none; border-color:var(--accent); }
+    .field { margin-bottom:18px; }
+    button { width:100%; padding:14px 20px; background:var(--accent); color:#0b1a12; border:none; border-radius:10px; font-size:16px; font-weight:700; cursor:pointer; transition:background .15s; }
+    button:hover:not(:disabled) { background:#40cc81; }
+    button:disabled { opacity:.6; cursor:not-allowed; }
+    .msg { margin-top:18px; padding:14px 16px; border-radius:10px; font-size:14px; display:none; }
+    .msg.ok   { display:block; background:#0f3321; color:#9beebc; border:1px solid #1f8a4e; }
+    .msg.err  { display:block; background:#2b1517; color:#ff9b9b; border:1px solid #7a2a2d; }
+    .msg code { background:rgba(0,0,0,.3); padding:1px 6px; border-radius:4px; font-size:12px; }
+    .footer { margin-top:24px; padding-top:20px; border-top:1px solid var(--border); color:var(--muted); font-size:13px; }
+    .footer a { color:var(--accent); }
+    a { color:var(--accent); text-decoration:none; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>🎓 Claim your repo access</h1>
+    <p class="lede">
+      Thanks for buying the course. Enter your <strong>Gumroad receipt / sale ID</strong>
+      and the <strong>GitHub username</strong> you want added, and we'll invite you to the private repo instantly.
+    </p>
+
+    <form id="access-form">
+      <div class="field">
+        <label for="receipt">Receipt / Sale ID
+          <span class="hint">from your purchase email</span>
+        </label>
+        <input id="receipt" type="text" required autocomplete="off" placeholder="e.g. gum_01HGXYZ123..." />
+      </div>
+
+      <div class="field">
+        <label for="github">GitHub username
+          <span class="hint">no @, no URL</span>
+        </label>
+        <input id="github" type="text" required autocomplete="off" placeholder="e.g. tkivite" pattern="[a-zA-Z0-9]([a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38}" />
+      </div>
+
+      <button type="submit" id="submit">Grant me access →</button>
+
+      <div class="msg" id="msg"></div>
+    </form>
+
+    <div class="footer">
+      Trouble? Email <a href="mailto:support@yourcourse.co.ke">support@yourcourse.co.ke</a> with your Gumroad order number.
+      <br/>
+      Don't have GitHub? You can still access the full course via your <a href="https://gumroad.com/library">Gumroad library</a>.
+    </div>
+  </div>
+
+<script>
+  // ======= Config: point to your deployed n8n instance =======
+  const ACCESS_ENDPOINT = window.ACCESS_ENDPOINT_OVERRIDE
+    || 'https://api.yourcourse.co.ke/webhook/course/claim-access';
+  // ===========================================================
+
+  const form   = document.getElementById('access-form');
+  const btn    = document.getElementById('submit');
+  const msg    = document.getElementById('msg');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    msg.className = 'msg';
+    msg.textContent = '';
+    btn.disabled = true;
+    btn.textContent = 'Granting access…';
+
+    const receipt = document.getElementById('receipt').value.trim();
+    const github  = document.getElementById('github').value.trim().replace(/^@/, '');
+
+    try {
+      const res = await fetch(ACCESS_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ receipt, github })
+      });
+      const data = await res.json().catch(() => ({}));
+
+      if (res.ok && data.success) {
+        msg.className = 'msg ok';
+        msg.innerHTML = `✅ ${data.message}<br/><br/>Check <a href="https://github.com/notifications" target="_blank">GitHub notifications</a> or your email for the invite. Repo: <code>${data.repo}</code>`;
+        btn.textContent = 'Done ✓';
+      } else {
+        msg.className = 'msg err';
+        msg.textContent = data.message || 'Something went wrong. Try again or email support.';
+        btn.disabled = false;
+        btn.textContent = 'Try again';
+      }
+    } catch (err) {
+      msg.className = 'msg err';
+      msg.textContent = 'Network error. Check your connection and try again.';
+      btn.disabled = false;
+      btn.textContent = 'Try again';
+    }
+  });
+</script>
+</body>
+</html>
+

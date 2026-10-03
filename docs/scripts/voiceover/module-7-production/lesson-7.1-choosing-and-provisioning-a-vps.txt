@@ -1,0 +1,21 @@
+# Lesson 7.1 : Choosing and provisioning a VPS
+# Target runtime: 8 min
+# Word count: ~435
+# Paste the lines below into ElevenLabs / Murf.
+# <break time="Ns" /> tags are ElevenLabs SSML.
+
+Welcome to module seven. Forty minutes from now, your workflows will be running on a real server with real HTTPS, surviving reboots, backed up nightly, firewalled, and ready to accept production Daraja credentials. Let's deploy.
+
+Four providers, roughly the same price and specs. Hetzner is cheapest at about five dollars equivalent — but Europe-based, so maybe sixty milliseconds further from Kenya than DigitalOcean's Johannesburg region. For STK push, that latency is invisible to users. Pick on preference. <break time="1s" /> Minimum specs: two vCPU, two gigabytes RAM, forty gigabytes disk. That handles roughly a million M-Pesa transactions a month comfortably. Scale up if you grow.
+
+Walkthrough on Hetzner. Create a project. Add a server. Ubuntu twenty-four point oh four LTS. Pick CPX11. Pick a datacenter close to your users — Nuremberg is fine for Kenya. Add your SSH key. Create. <break time="1s" /> Twenty seconds later, you have an IP address. SSH into it as root. You're on the box.
+
+Point a domain at it. You need a real domain for Let's Encrypt. Buy a .co.ke from safaricom or Truehost — about a thousand shillings a year. Or use a subdomain of a domain you already own. <break time="1s" /> In your DNS provider, add an A record. Hostname: api — or whatever subdomain. Value: your VPS's IP. TTL: three hundred. Save. Wait a minute for DNS to propagate.
+
+The vps-setup script. One command. Replace the GitHub URL with your fork. Pass your domain and email as arguments. The script: <break time="1s" /> Installs Docker, Docker Compose, Nginx, UFW, Certbot. Clones the course repo to opt slash n8n dash mpesa. Configures Nginx as a reverse proxy. Issues a Let's Encrypt cert. Enables UFW with only SSH, eighty, and four four three open. Updates the dot env with your production domain. <break time="1s" /> Takes about three minutes. At the end, your domain serves n8n over HTTPS.
+
+Final step: edit opt slash n8n dash mpesa slash docker slash dot env. Paste your production Daraja Consumer Key, Secret, Shortcode, and Passkey. Set MPESA_ENV equals production. Set MPESA_BASE_URL equals https colon slash slash api dot safaricom dot co dot ke. <break time="1s" /> Then: docker compose up dash d. Thirty seconds. Open your browser to your domain. Create the n8n owner account. Import your workflows. Live.
+
+First sanity check. From Postman, hit your production webhook URL for the STK push with amount one. Phone buzzes. You enter PIN. One shilling leaves your account for the shortcode owner. Callback arrives. Database row updates. If all four steps happen in under five seconds, you're live.
+
+Next lesson: lock down secrets and auth. See you there.

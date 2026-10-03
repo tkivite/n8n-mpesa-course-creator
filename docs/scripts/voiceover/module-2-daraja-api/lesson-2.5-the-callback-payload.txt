@@ -1,0 +1,19 @@
+# Lesson 2.5 : The callback payload
+# Target runtime: 5 min
+# Word count: ~448
+# Paste the lines below into ElevenLabs / Murf.
+# <break time="Ns" /> tags are ElevenLabs SSML.
+
+We've seen the request shape. Now the response. This is what Safaricom POSTs to your callback URL after the customer either pays, cancels, or runs out of time.
+
+Here's a successful callback. Observe three annoying things about this shape. <break time="1s" /> First, everything is nested inside Body dot stkCallback. Two layers of wrapping before you get to anything useful. Our callback workflow will unwrap this immediately in a Code node. <break time="1s" /> Second, the useful fields — the amount, the receipt number — are not plain JSON properties. They're inside an array called Item, where each entry has a Name and a Value. So to get the receipt number, you can't just read dot MpesaReceiptNumber — you have to iterate the Item array, find the entry where Name equals MpesaReceiptNumber, then read its Value. <break time="1s" /> Third, CallbackMetadata is only present on success. If the user cancelled, there is no CallbackMetadata key at all. You have to check its existence before iterating.
+
+Here's the parsing pattern we use. Loop the Item array, build a flat object keyed by Name. Now meta dot Amount, meta dot MpesaReceiptNumber, meta dot PhoneNumber are all directly accessible. This is the first node of our callback workflow in module five.
+
+Here's a failure. Same wrapper, but no CallbackMetadata. ResultCode non-zero. ResultDesc is a human-readable reason. <break time="1s" /> ResultCode zero means success. Anything else means some kind of failure. We'll see the full table of codes in the next lesson.
+
+Critical field: CheckoutRequestID. This is the one you use to match the callback back to the original request. When we fire the STK push, Daraja returns a CheckoutRequestID synchronously. We save it in our database as the primary key. When the callback arrives, we look up that row by CheckoutRequestID and update the status. <break time="1s" /> MerchantRequestID is also returned, but you rarely use it. CheckoutRequestID is the one that matters.
+
+One rule that saves your business. Your callback endpoint should return two hundred OK the moment the request arrives. Don't wait for the database update. Don't wait for the SMS send. Return two hundred, then process asynchronously. <break time="1s" /> Why? Safaricom does not retry callbacks. They send it once. If your endpoint is slow, times out, or errors, they will NOT send it again. You just lost that transaction's final status. <break time="1s" /> In n8n, this is controlled by the Webhook node's Response Mode. We set it to "on received". The two hundred fires instantly, and the rest of the workflow runs in the background. We'll build this in module five.
+
+Next up: the result codes. There are about twenty you'll see in the wild. We'll cover the twelve that actually matter.

@@ -1,0 +1,21 @@
+# Lesson 6.4 : Handling stuck transactions
+# Target runtime: 7 min
+# Word count: ~341
+# Paste the lines below into ElevenLabs / Murf.
+# <break time="Ns" /> tags are ElevenLabs SSML.
+
+Rare case. A transaction has been pending for more than twenty-four hours. The reconciliation workflow stopped trying because stkpushquery no longer works for it. What now? Three strategies, in order of effort.
+
+Strategy one: auto-timeout. Build another scheduled workflow — once an hour — that finds pending transactions older than twenty-four hours and marks them timeout. The customer-facing UI can show "we didn't receive confirmation of this payment — if you believe you paid, please contact support". <break time="1s" /> Safe choice for ninety percent of businesses. Rare that these are actually successful payments. Easy to handle manually when they are.
+
+Strategy two: Daraja's transaction status API. Different endpoint from stkpushquery. Works for weeks-old transactions. More expensive to set up — it requires an InitiatorName and an encrypted SecurityCredential — but it's the only way to recover ancient stuck transactions programmatically. <break time="1s" /> We don't build this in the course because setup is production-only, but the handbook has notes. Add it when you need it.
+
+Strategy three: an internal customer support portal. A simple web page where support can input a phone number and a date range, see any pending transactions, and resolve each one manually with a note. <break time="1s" /> Build this as a Retool, Appsmith, or Budibase app pointed at your database. Half a day of work. CS loves it. Reduces "where's my money" tickets dramatically.
+
+Let's build strategy one quickly. New workflow. Schedule hourly. One Postgres node:
+
+Update any pending transaction older than twenty-four hours to timeout. Return the affected rows so we can log. <break time="1s" /> Second node: email ops with a daily digest of transactions that got auto-timed-out. Rare, but ops should know.
+
+Save, activate. First run happens in about an hour. Mostly it will do nothing — your reconciliation workflow should resolve most things within minutes. But over months of operation, this will catch the fringe cases that fall through.
+
+Module six done. Your M-Pesa integration is now bulletproof against lost callbacks and stuck transactions. Next up: module seven, hardening for production. See you there.

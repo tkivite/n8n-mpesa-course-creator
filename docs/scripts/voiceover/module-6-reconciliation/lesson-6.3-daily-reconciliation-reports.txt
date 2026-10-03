@@ -1,0 +1,21 @@
+# Lesson 6.3 : Daily reconciliation reports
+# Target runtime: 7 min
+# Word count: ~263
+# Paste the lines below into ElevenLabs / Murf.
+# <break time="Ns" /> tags are ElevenLabs SSML.
+
+Short lesson. New workflow. Daily cron at six AM Nairobi time. Queries the previous day's transactions. Emails a summary to finance. Twenty minutes of work. Enormous business value.
+
+Schedule Trigger. Cron expression: zero six star star star — meaning every day at six AM. n8n honors the GENERIC_TIMEZONE env var we set to Africa Nairobi, so this fires at six AM Nairobi, not UTC.
+
+Postgres node. Query our pre-built view mpesa_daily_summary — remember from the schema, we defined that in module zero. It aggregates by day and status. <break time="1s" /> Filter: yesterday's day. The view is populated as transactions happen, so this query is nearly instant even on millions of rows.
+
+Code node builds an HTML email body. Sum the counts and amounts, render a simple table. If finance wants CSV, write a second Code node that returns comma-separated instead.
+
+Send Email node. To: finance at your company. From: ops. Subject: dollar json dot subject. HTML body: dollar json dot html. Enable "send as HTML". Done.
+
+Optional upgrade: upload a CSV copy to Google Drive. n8n has a Google Drive node. One click to create credentials. Append the CSV to a shared folder named "mpesa reports". Finance can download anytime, you have an off-site backup.
+
+Test it. Click "execute workflow". Email arrives. If you have no transactions from yesterday, the email will say "no data" — that's intentional. Finance still gets confirmation the system is running.
+
+Finance covered. Next and final lesson of module six: what to do when a transaction is older than twenty-four hours and still pending. See you there.

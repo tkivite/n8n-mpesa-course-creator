@@ -1,0 +1,21 @@
+# Lesson 8.3 : Use case C : School fees via Google Form
+# Target runtime: 10 min
+# Word count: ~409
+# Paste the lines below into ElevenLabs / Murf.
+# <break time="Ns" /> tags are ElevenLabs SSML.
+
+Third use case. School fees. Many Kenyan schools collect fees through M-Pesa PayBill, but parents call all day asking "did you receive my payment?". We solve it with a parent-facing Google Form plus automatic receipt generation.
+
+The Google Form. Five fields. Admission number, pupil name, parent phone, parent email, amount, term. Standard form. Takes ten minutes to build. <break time="1s" /> Connect Google Form to n8n via a Google Apps Script that POSTs the form submission to our webhook. Snippet in the handbook. One-time setup per form.
+
+Workflow. Google Form webhook fires on every submission. Code node validates admission number against a Google Sheets of enrolled pupils — reject payments for unknown admission numbers. Execute Workflow fires STK push with reference FEES dash admission number. <break time="1s" /> On the callback workflow, if reference starts with FEES-, generate a PDF receipt and email it to the parent.
+
+PDF receipt. Two options. <break time="1s" /> Option one: a free HTML-to-PDF n8n community node. Install from the Community Nodes section. Feed it HTML, out comes a PDF buffer. Attach to the email. <break time="1s" /> Option two: PDF.co or Documint — paid APIs for template-based PDF generation. More polished output but costs about one cent per PDF. For high-volume schools, option one is cheaper. <break time="1s" /> The template: school logo at top, receipt heading, pupil name, admission number, term, amount, M-Pesa receipt number, date, head teacher's signature image. HTML-plus-CSS in a Code node.
+
+Email Send node. To: the parent email from the form. Subject: "Fees receipt for pupil-name, Term x". Body: short text. Attachments: the PDF buffer from the previous node, filename FEES dash admission number dot pdf. <break time="1s" /> Parent gets a receipt within seconds. Head teacher's phone stops ringing. Everybody wins.
+
+Admin dashboard. A simple admin interface showing all pupils and payment status per term. Build with Retool, Appsmith, or an n8n workflow that returns an HTML page. <break time="1s" /> Columns: pupil, admission number, Term 1 paid, Term 2 paid, Term 3 paid, total outstanding. One row per pupil. Head teacher opens this once a week and knows exactly who to follow up.
+
+Automated reminders. Another scheduled workflow. Finds parents whose fees are more than seven days overdue and sends a polite SMS or WhatsApp message. Weekly cadence. <break time="1s" /> This workflow alone — automated reminders — has transformed collections for schools we've deployed to. Weekly, three AM, zero human work.
+
+Three down. Next: donations with a Bubble.io frontend. See you there.

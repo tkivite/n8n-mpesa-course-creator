@@ -1,0 +1,17 @@
+# Lesson 9.2 : Account Balance and Transaction Status
+# Target runtime: 7 min
+# Word count: ~296
+# Paste the lines below into ElevenLabs / Murf.
+# <break time="Ns" /> tags are ElevenLabs SSML.
+
+Two utility APIs. Account Balance queries your float. Transaction Status looks up any transaction by its Daraja ID. Both are simple once you understand B2C — they use the same InitiatorName and SecurityCredential pattern.
+
+Account Balance payload. Looks like B2C minus the recipient and amount. Returns an asynchronous callback with your float balance by account type — utility account, charges paid account, working account. <break time="1s" /> Fire this via a scheduled workflow every hour. Store the balance in a Postgres table. Alert if below a threshold — say, if your working account float is under ten thousand shillings, Slack ops immediately.
+
+Workflow sketch. Schedule hourly. Execute Workflow auth. Build Account Balance payload. HTTP Request POST. Return success response immediately — the actual balance arrives via ResultURL callback. <break time="1s" /> Separate callback workflow: receives balance, parses the WorkingAccount AvailableFunds field, inserts into mpesa_float_history table. Checks threshold. If below, send ops alert.
+
+Transaction Status. Different from stkpushquery — this one can look up ANY M-Pesa transaction by its ID, including transactions from weeks ago. Useful for customer service: "I paid two Tuesdays ago, I have the receipt, where's my service?" <break time="1s" /> Build a workflow with a webhook that takes a receipt number — like the M-Pesa confirmation code "SGH1A2B3C4" — and queries Transaction Status. Returns the full details to your CS portal.
+
+CS portal flow. CS agent gets a complaint. Opens internal tool. Enters receipt number. Internal tool calls our n8n workflow. Workflow calls Transaction Status. Returns full details — sender, receiver, amount, time, status. <break time="1s" /> Agent sees whether the transaction was successful, who it went to, what time, what reference. Resolves most "where's my money" tickets in one minute.
+
+Two utility APIs down. Next: C2B. Customer-initiated payments without an STK prompt. See you there.

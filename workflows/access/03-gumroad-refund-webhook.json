@@ -1,0 +1,124 @@
+{
+  "name": "Access 03 : Gumroad Refund Webhook",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "course/gumroad-refund",
+        "responseMode": "onReceived",
+        "responseData": "={{ JSON.stringify({ ok: true }) }}",
+        "options": {}
+      },
+      "id": "r1000000-0000-0000-0000-000000000001",
+      "name": "Gumroad Refund Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [200, 300],
+      "webhookId": "course-gumroad-refund"
+    },
+    {
+      "parameters": {
+        "jsCode": "const b = $json.body || $json;\n// Gumroad fires 'refund' or 'dispute' pings\nconst isRefund = b.refunded === 'true' || b.resource_name === 'refund' || b.resource_name === 'dispute';\nif (!isRefund) return [{ json: { skip: true } }];\nreturn [{ json: {\n  skip: false,\n  provider_sale_id: b.sale_id,\n  reason: b.resource_name || 'refunded',\n  refund_body: b\n}}];"
+      },
+      "id": "r1000000-0000-0000-0000-000000000002",
+      "name": "Parse Refund",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [420, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "typeValidation": "strict" },
+          "combinator": "and",
+          "conditions": [
+            {
+              "leftValue": "={{ $json.skip }}",
+              "rightValue": false,
+              "operator": { "type": "boolean", "operation": "equals" }
+            }
+          ]
+        }
+      },
+      "id": "r1000000-0000-0000-0000-000000000003",
+      "name": "Is a refund?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [640, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE purchases\nSET refunded_at = NOW()\nWHERE provider_sale_id = $1\nRETURNING id, buyer_email;",
+        "options": { "queryReplacement": "={{ $json.provider_sale_id }}" }
+      },
+      "id": "r1000000-0000-0000-0000-000000000004",
+      "name": "Mark Purchase Refunded",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [860, 220]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT g.id, g.github_username\nFROM access_grants g\nWHERE g.purchase_id = $1 AND g.revoked_at IS NULL;",
+        "options": { "queryReplacement": "={{ $json.id }}" }
+      },
+      "id": "r1000000-0000-0000-0000-000000000005",
+      "name": "Find Active Grants",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [1080, 220]
+    },
+    {
+      "parameters": {
+        "method": "DELETE",
+        "url": "=https://api.github.com/repos/{{ $env.GH_REPO_OWNER }}/{{ $env.GH_REPO_NAME }}/collaborators/{{ $json.github_username }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $env.GH_ADMIN_TOKEN }}" },
+            { "name": "Accept",        "value": "application/vnd.github+json" },
+            { "name": "User-Agent",    "value": "n8n-mpesa-course-access-bot" }
+          ]
+        },
+        "options": {
+          "timeout": 15000,
+          "response": { "response": { "neverError": true } }
+        }
+      },
+      "id": "r1000000-0000-0000-0000-000000000006",
+      "name": "GitHub: Remove Collaborator",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1300, 220]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE access_grants\nSET revoked_at = NOW(),\n    revoke_reason = 'refund'\nWHERE github_username = $1 AND revoked_at IS NULL\nRETURNING id;",
+        "options": { "queryReplacement": "={{ $('Find Active Grants').item.json.github_username }}" }
+      },
+      "id": "r1000000-0000-0000-0000-000000000007",
+      "name": "Mark Grant Revoked",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [1520, 220]
+    }
+  ],
+  "connections": {
+    "Gumroad Refund Webhook": { "main": [[{ "node": "Parse Refund", "type": "main", "index": 0 }]] },
+    "Parse Refund":           { "main": [[{ "node": "Is a refund?", "type": "main", "index": 0 }]] },
+    "Is a refund?":           { "main": [[{ "node": "Mark Purchase Refunded", "type": "main", "index": 0 }], []] },
+    "Mark Purchase Refunded": { "main": [[{ "node": "Find Active Grants", "type": "main", "index": 0 }]] },
+    "Find Active Grants":     { "main": [[{ "node": "GitHub: Remove Collaborator", "type": "main", "index": 0 }]] },
+    "GitHub: Remove Collaborator": { "main": [[{ "node": "Mark Grant Revoked", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "pinData": {},
+  "meta": {
+    "description": "On Gumroad refund/dispute, marks the purchase refunded, then revokes every active GitHub collaborator grant tied to it."
+  },
+  "tags": [{ "name": "access" }, { "name": "course" }]
+}
+

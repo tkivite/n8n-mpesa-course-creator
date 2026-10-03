@@ -1,0 +1,19 @@
+# Lesson 4.6 : Persisting the transaction
+# Target runtime: 7 min
+# Word count: ~382
+# Paste the lines below into ElevenLabs / Murf.
+# <break time="Ns" /> tags are ElevenLabs SSML.
+
+Add a Postgres node between HTTP Request and Build API Response. Call it "Save Transaction (Pending)".
+
+Click into the Postgres node. Credential dropdown — create new. Host: the container name "postgres". Database: "n8n". User: n8n. Password: whatever you set in dot env. Click test — green checkmark. Save.
+
+Operation: insert. Table: mpesa_transactions — the one our schema SQL created when Postgres first started up. Mapping mode: define below. <break time="1s" /> Six columns to set. Checkout request ID and merchant request ID from the HTTP response. Phone, amount, reference from the validation step — referenced by node name. Status: the string "pending". We don't know yet if the customer will complete the payment. That's resolved later by the callback workflow.
+
+Let me show you the result. Open psql in a terminal. "docker compose exec postgres psql dash U n8n". Query: select from mpesa_transactions. Empty. <break time="1s" /> Fire a test STK push from Postman. Query again. One row, status pending, with the checkout request ID that matches the one Daraja returned.
+
+One philosophy point. We save every transaction attempt, even ones Daraja rejected. Why? Because when a customer says "I was charged but didn't get my service", you need an audit trail. If there's no row in the database for their reference, you have proof Daraja never processed it. If there's a row with status failed, you can show the exact reason. <break time="1s" /> To save failures too, wire the error output of the HTTP Request node to another insert node with status equal to "failed-to-send" and the error message captured. Or — simpler — write a Code node that handles both branches and inserts the right row. Same table, different status.
+
+Here's the clean way. Delete the current insert. Add an IF node right after HTTP Request checking if ResponseCode equals zero. True branch: insert with status pending. False branch: insert with status failed and populate the error_message column. Both branches then merge into Build API Response. <break time="1s" /> Three extra nodes, but your database now has a complete audit log. Ops, finance, and support will love you.
+
+Next lesson is the capstone of module four. Full end-to-end testing with Postman. We hit the webhook, we watch the database, we check Daraja's dashboard. Then module five — the callback. See you there.

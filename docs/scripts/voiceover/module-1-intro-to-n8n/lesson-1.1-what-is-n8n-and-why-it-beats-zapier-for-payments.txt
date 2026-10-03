@@ -1,0 +1,23 @@
+# Lesson 1.1 : What is n8n and why it beats Zapier for payments
+# Target runtime: 6 min
+# Word count: ~612
+# Paste the lines below into ElevenLabs / Murf.
+# <break time="Ns" /> tags are ElevenLabs SSML.
+
+If you've ever used Zapier or Make dot com, you already understand the mental model. You connect services. Trigger here, action there. Data flows through. n8n plays in the same arena — but it's built different. <break time="1s" /> Three things make it the right tool for payments. One: it's open source. You can run it on your own server. No per-transaction fees. No "contact sales" for the plan that unlocks the feature you need. Two: it's code-friendly. When the visual nodes aren't enough — and with M-Pesa, they won't be — you drop into a JavaScript node and write exactly what you need. Three: four hundred plus integrations out of the box, with a vibrant community adding more every week.
+
+For M-Pesa specifically, the four nodes we care about are: Webhook — to receive requests from your frontend. HTTP Request — to call Daraja. Code — for the password and timestamp logic. And Postgres — to store transactions. That's it. Four nodes. Those four nodes become every workflow in this course.
+
+Let's talk money. If you process ten thousand M-Pesa transactions a month on Zapier Pro, you're looking at seventy-three dollars. Make dot com, around twenty-nine plus overages. n8n self-hosted on a six-dollar-a-month Hetzner box? Six dollars. Flat. <break time="1s" /> That cost difference is why every serious Kenyan automation agency has moved to n8n. And why we're going to as well.
+
+Here's a preview of what we'll build. Webhook receives a payment request from your frontend. A validation node checks the phone number format. The Execute Workflow node calls our reusable OAuth sub-workflow. The HTTP Request node fires the STK push to Safaricom. The Postgres node saves a pending transaction. Then we return the result to the caller. All visual. All editable. All in your browser.
+
+One of the best things about n8n for payments: every execution is logged. You can click into any transaction and see exactly what data flowed between every node. When Safaricom's callback arrives, you can replay it. When a payment fails, you can see which node failed and why. In a traditional backend, that's a logging infrastructure you'd have to build yourself.
+
+A quick note on the license. n8n is "fair-code" licensed. Translation: you can self-host it for free, for internal business use, forever. The only time you pay for a license is if you want to embed n8n inside a product you sell to customers. For everything we do in this course, you pay zero license fees.
+
+I want to show you something. On the left is a Spring Boot M-Pesa integration. Three hundred and forty-seven lines of Java, three Dockerfiles, a certificate configuration, a WSDL, and a Jenkins pipeline. On the right is the same functionality in n8n. Four nodes. <break time="1s" /> I built the Java version in two thousand twenty-two. It took three weeks. I built the n8n version while filming this course. It took three hours. The n8n version has fewer bugs because there's less to break.
+
+Here's the pitch for n8n specifically with M-Pesa. One: you can deploy locally in sixty seconds with Docker. Two: your workflows are stored as JSON files you can version control in Git. Three: when Safaricom changes the Daraja API — and they will — you fix one node, not a whole microservice. Four: non-technical team members can look at the workflow and understand what the payment system does. That last one is huge. Try explaining a Spring Boot controller to your product manager.
+
+Alright. You know what n8n is and why we're using it. In the next lesson, we install it with Docker and have it running locally in less than a minute. Let's go.

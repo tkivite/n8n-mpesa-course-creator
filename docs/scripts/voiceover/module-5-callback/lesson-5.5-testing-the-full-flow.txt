@@ -1,0 +1,21 @@
+# Lesson 5.5 : Testing the full flow
+# Target runtime: 8 min
+# Word count: ~313
+# Paste the lines below into ElevenLabs / Murf.
+# <break time="Ns" /> tags are ElevenLabs SSML.
+
+Final lesson of module five. We test the complete flow: STK push triggers prompt, customer pays, callback arrives, database updates, confirmation sends. Five tests, eight minutes.
+
+Test one: sandbox happy path. Hit the STK push webhook with your real phone number. Phone buzzes. Enter PIN two-four-five-six — the sandbox PIN. Callback workflow fires. Database row flips to success. Email arrives. Perfect.
+
+Test two: cancel. Same STK push. On the phone, press cancel. Callback arrives with ResultCode one-oh-three-two. Database row flips to cancelled. No customer email — because our IF node routed to the failure branch. Ops alert fires. Correct.
+
+Test three: timeout. STK push, ignore the prompt. After about sixty seconds, callback arrives with ResultCode one-oh-three-seven. Row updates to timeout — because our status mapping treats one-oh-three-seven as timeout, not just failure. Clear status for support team to understand.
+
+Test four: simulated callback. Scripts folder has simulate-callback dot sh. Takes a checkout request ID and a status. Fires a fake Safaricom callback at your webhook. Useful during development when you don't want to actually touch Daraja repeatedly. <break time="1s" /> Run it with a known pending row's checkout request ID and "success". Row updates. Email sends. Full flow validated without burning Daraja quota.
+
+Test five: idempotency. Fire the same success callback twice. First call: row updates, email sends. Second call: row already resolved, UPDATE affects zero rows, no second email. Idempotent. Good.
+
+Open the executions view. Each callback execution takes about two hundred milliseconds end to end. Within that: Postgres update, audit insert, IF branching, email send. Under Safaricom's thirty-second timeout by a factor of a hundred and fifty. Comfortable.
+
+Module five done. The callback is the piece that turns pending into revenue. You've just built it, hardened it, and tested it. Next up: module six, reconciliation — the safety net for the two percent of callbacks that never arrive. See you there.

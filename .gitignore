@@ -1,0 +1,42 @@
+# Environment
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# n8n local data
+docker/n8n_data/
+docker/postgres_data/
+docker/.ngrok/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs
+*.log
+logs/
+
+# Build artifacts
+dist/
+build/
+.build/
+node_modules/
+
+# Secrets / certs
+*.pem
+*.key
+*.crt
+!deploy/**/*.example
+
+# Course working files (not for distribution)
+_drafts/
+_scripts-wip/
+_recordings/
+

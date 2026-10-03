@@ -1,0 +1,66 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  validate:
+    name: Validate workflows & build voiceover
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install deps
+        run: npm ci || npm install
+
+      - name: Validate workflow JSONs
+        run: npm run validate:workflows
+
+      - name: Extract voiceover scripts
+        run: npm run build:voiceover
+
+      - name: Upload voiceover artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: voiceover-text
+          path: docs/scripts/voiceover/
+          retention-days: 30
+
+  pdf:
+    name: Render course PDFs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - uses: browser-actions/setup-chrome@v1
+        id: chrome
+
+      - name: Install deps
+        run: npm ci || npm install
+
+      - name: Build PDFs
+        env:
+          CHROME_PATH: ${{ steps.chrome.outputs.chrome-path }}
+        run: npm run build:pdf
+
+      - name: Upload PDFs
+        uses: actions/upload-artifact@v4
+        with:
+          name: course-pdfs
+          path: docs/*.pdf
+          retention-days: 30
+

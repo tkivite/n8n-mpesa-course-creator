@@ -1,0 +1,19 @@
+sequenceDiagram
+    autonumber
+    participant D as Daraja
+    participant W as Webhook /mpesa/stk-callback
+    participant P as Parse Callback
+    participant DB as Postgres
+    participant IF as IF (success?)
+    participant N as Notify (SMS/WhatsApp)
+    participant S as Slack ops
+
+    D->>W: POST stkCallback payload
+    W-->>D: 200 OK (On Received)
+    W->>P: Nested body
+    P->>DB: UPDATE mpesa_transactions<br/>WHERE checkout_request_id = ?
+    DB-->>IF: row with status
+    IF-->>N: on success → confirm
+    IF-->>S: on failure → alert
+    P->>DB: INSERT mpesa_callbacks (audit)
+

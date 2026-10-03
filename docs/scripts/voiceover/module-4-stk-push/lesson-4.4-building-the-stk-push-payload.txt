@@ -1,0 +1,25 @@
+# Lesson 4.4 : Building the STK Push payload
+# Target runtime: 10 min
+# Word count: ~523
+# Paste the lines below into ElevenLabs / Murf.
+# <break time="Ns" /> tags are ElevenLabs SSML.
+
+Add a Code node after the Execute Workflow. Name it "Build STK Payload". This is where the twelve fields we studied in module two come together, built fresh for every single request.
+
+Pull in inputs. The validated phone, amount, reference, description from the Validate Input node — notice we reference it by name using dollar paren "Validate Input" paren dot item dot json. That lets us jump past the Execute Workflow node, which is between us and the validation output. <break time="1s" /> The access_token from the immediately previous Execute Workflow node — dollar json dot access_token. <break time="1s" /> Shortcode, passkey, callback base URL, and base URL from env vars. If passkey is missing, we throw an early error with a clear message. Beats a cryptic Daraja response.
+
+Timestamp. The format Daraja wants is Y-Y-Y-Y-M-M-D-D-H-H-M-M-S-S as a string, in Africa Nairobi time. <break time="1s" /> Note the padStart call. If the month is January, getMonth returns zero, we add one to get one, we have to pad to "zero-one" so the final string is fourteen characters. Without padding, January tenth would produce a thirteen-character timestamp that Daraja rejects. <break time="1s" /> Also note I'm not calling toLocaleString with a timezone. That's because our docker-compose sets the container timezone to Africa Nairobi via the TZ env var — so new Date and getHours already return Nairobi time. If you ever run this without that config, you must add explicit timezone handling.
+
+Password. The formula we memorized in module two. Concatenate the three strings — shortcode first, passkey second, timestamp third — Buffer them, base-sixty-four them. One line. <break time="1s" /> Order matters. Passkey after shortcode. Timestamp last. Swap any pair and the result is a different password, which Daraja rejects.
+
+The payload. Every field we studied in lesson two point four. BusinessShortCode and PartyB both the shortcode, as integers. Phone three times — PartyA, PhoneNumber, both integers. Callback URL constructed from the base URL plus our callback path. <break time="1s" /> I return the URL and auth header alongside the payload. That's a small convenience — it means the next node, the HTTP Request, just references dollar json dot url and dollar json dot authHeader instead of hardcoding anything. Clean separation.
+
+Smart debugging move. In n8n, you can "pin" the output of any node. Right-click the Validate Input node, pick "pin data". Now when you execute downstream nodes individually, they use that pinned data instead of re-running the webhook. Faster iteration while you tweak the Build STK Payload Code.
+
+One potential pitfall. TransactionType is hardcoded to CustomerPayBillOnline. If your real shortcode is a BuyGoods till, change it to CustomerBuyGoodsOnline — or make it configurable via env var, which is what I'd do in production. Let me show you.
+
+Add an env var MPESA_TX_TYPE defaulting to PayBill. Now swapping to a till is just an env change, no node edit. Same philosophy as the base URL — environment-driven, not code-driven.
+
+Don't forget to add it to dot env dot example and the n8n service's environment block in docker compose yml. Future-you will thank present-you for the clear default.
+
+Payload built. Next lesson, we actually call Daraja. See you there.

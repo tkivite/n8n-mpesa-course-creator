@@ -1,0 +1,17 @@
+# Lesson 10.3 : White-labeling and scaling
+# Target runtime: 6 min
+# Word count: ~393
+# Paste the lines below into ElevenLabs / Murf.
+# <break time="Ns" /> tags are ElevenLabs SSML.
+
+Final lesson. Three strategies to scale beyond "one developer selling time". Each is a different business model.
+
+Strategy one: productize per vertical. Instead of custom integrations, build three fixed packages. School. SACCO. E-commerce. Each one bundles the specific workflows for that vertical plus their quirks — fees receipts for schools, loan repayment matching for SACCOs, Woo integration for e-commerce. <break time="1s" /> Higher margin because repeatable. Lower risk because the scope is known. You can finish a school integration in two days if you've done ten before.
+
+Strategy two: white-label. Many Kenyan dev agencies serve clients but don't have M-Pesa expertise. License your workflows and playbook to them. <break time="1s" /> Pricing: five hundred thousand upfront plus five percent of their deliverables. They sell to their clients at full price, you don't touch client-facing work. <break time="1s" /> Three to five white-label partners and you have a seven-figure business without ever doing another client call yourself.
+
+Strategy three: turn it into a SaaS. Multi-tenant n8n instance you host. Clients sign up, enter their Daraja credentials, pick workflows from a catalog, pay monthly. <break time="1s" /> Harder to build. Much higher ceiling. If you can get a hundred SMBs paying ten thousand a month each, that's a million shillings monthly recurring. That's a real company. <break time="1s" /> Technical hurdle: multi-tenant isolation in n8n. There's a paid n8n license for embedding. Alternatively, run one n8n container per tenant on a shared VPS — cheap but you have to manage upgrades carefully.
+
+Where to find clients. In Kenya, LinkedIn is the single highest-converting channel for B2B services. Post weekly about M-Pesa integrations you've shipped. Tag clients when they allow. <break time="1s" /> WhatsApp Business groups where founders hang out. Guest posts on Medium or Dev.to for inbound SEO. YouTube videos showing you building — build-in-public style, three minutes each, consistent posting. <break time="1s" /> One post a week consistently is better than ten posts in a burst. Momentum matters.
+
+That's module ten. That's the course. <break time="1s" /> You've installed n8n. Built four production workflows. Deployed to a real VPS with HTTPS. Hardened for production. Shipped five real-world use cases. And now you know how to turn the skill into revenue. <break time="1s" /> Go ship something. If you build cool, tag me — I love seeing what the community makes. Discord link's in your dashboard. <break time="1s" /> Thanks for taking the course.

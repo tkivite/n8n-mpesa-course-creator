@@ -1,0 +1,18 @@
+flowchart LR
+    subgraph Internet
+      I[Frontend / Daraja]
+    end
+    subgraph VPS [Hetzner CPX11]
+      N[Nginx :443<br/>Let's Encrypt]
+      subgraph Docker
+        W[n8n :5678]
+        P[(Postgres)]
+      end
+      N -->|proxy| W
+      W <-->|workflows + TX| P
+    end
+    I <-->|HTTPS| N
+    W <-->|OAuth, STK, callback| D[Daraja API]
+    W -->|alerts| S[Slack / Email]
+    P -->|nightly backup| B[(Backblaze B2)]
+

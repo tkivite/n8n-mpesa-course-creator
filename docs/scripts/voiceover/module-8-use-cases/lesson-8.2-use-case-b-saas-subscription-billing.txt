@@ -1,0 +1,21 @@
+# Lesson 8.2 : Use case B : SaaS subscription billing
+# Target runtime: 9 min
+# Word count: ~311
+# Paste the lines below into ElevenLabs / Murf.
+# <break time="Ns" /> tags are ElevenLabs SSML.
+
+Second use case. SaaS billing. Every month, on a schedule, charge your active subscribers. If they pay, extend their subscription. If they don't, send dunning emails and eventually suspend.
+
+First, a subscriptions table. Phone number as the billing identifier. Plan name and amount. Status: active, past due, or cancelled. Next bill date. That's all you need for a simple SaaS. <break time="1s" /> Schema in the course repo under db slash saas slash schema dot sql.
+
+Workflow. Schedule trigger: every day at nine AM. Postgres query: find subscriptions where next_bill_date is today and status is active. For each, build an STK push payload. Fire STK push. <break time="1s" /> Reference convention: SUB dash subscription ID. That's how the callback matches back to the subscription for status updates.
+
+On the callback workflow, branch on reference starting with SUB-. On success: update subscription's next_bill_date to add a month, status active. On failure: update status to past_due, send dunning email, retry in three days. <break time="1s" /> Dunning logic is a separate workflow. Daily cron that finds past_due subscriptions and re-fires STK push. After three attempts, status becomes "cancelled" and the customer loses access.
+
+Upgrades. A new workflow with a webhook that your SaaS frontend hits. Updates the subscription's plan amount and bills immediately for the pro-rated difference. Simple pattern — Postgres read, Postgres update, Execute Workflow to STK push.
+
+Trials. Add a trial_ends_at column. If trial_ends_at is in the future, don't bill. If it's in the past and no first bill yet, bill now. <break time="1s" /> One daily workflow handles trial conversion automatically. The customer never experiences a gap.
+
+Bonus: metrics. Weekly email to the founder with new subs, churned subs, MRR, and payment success rate. Postgres aggregations in a few Code nodes. Email as HTML. Twenty minutes of work. Beats a dashboard you never check.
+
+Billing covered. Next up: school fees. See you there.

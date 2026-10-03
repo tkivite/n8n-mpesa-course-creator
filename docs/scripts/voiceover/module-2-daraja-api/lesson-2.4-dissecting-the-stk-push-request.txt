@@ -1,0 +1,21 @@
+# Lesson 2.4 : Dissecting the STK Push request
+# Target runtime: 6 min
+# Word count: ~572
+# Paste the lines below into ElevenLabs / Murf.
+# <break time="Ns" /> tags are ElevenLabs SSML.
+
+Here's a complete STK push payload. Twelve fields. We're going to go through every single one, because getting one of them wrong — and I've seen all twelve go wrong — kills the request with a cryptic error.
+
+Field one: BusinessShortCode. Integer. Your PayBill or Till. In sandbox, one-seven-four-three-seven-nine. Watch the type — if you send it as a string, some Daraja endpoints accept it, others return a four hundred. Always send it as a number. <break time="1s" /> Field two: Password. The base-sixty-four we computed last lesson. String. <break time="1s" /> Field three: Timestamp. The same timestamp used to build the password. String. Must match exactly — down to the second — or the password won't match.
+
+Field four: TransactionType. Two legal values. CustomerPayBillOnline for PayBill shortcodes — this is what you'll use ninety percent of the time. CustomerBuyGoodsOnline for till numbers. <break time="1s" /> If your shortcode is a PayBill but you send BuyGoods, you get a cryptic "Bad Request - Invalid TransactionType" error. Match the type to your shortcode.
+
+Field five: Amount. Integer. Shillings, no decimals. The minimum is one. The maximum per transaction in production is seventy thousand for most shortcodes. Fractional amounts — like fifty shillings and fifty cents — will be rejected. If you need fractional pricing, round at the application layer. <break time="1s" /> Field six: PartyA. The payer's phone number. Format two-five-four-seven-X-X-X-X-X-X-X-X-X, as a number. <break time="1s" /> Field seven: PartyB. The receiver — your shortcode. Yes, this duplicates BusinessShortCode. No, I don't know why Safaricom designed it this way. Just make them match. <break time="1s" /> Field eight: PhoneNumber. Same as PartyA. Another duplicate. Make them match. <break time="1s" /> Why three fields for essentially two values? Historical. Daraja's internals share schemas across APIs — in B2C, these three fields are different. For STK push, redundant. Live with it.
+
+Field nine: CallBackURL. The URL Safaricom will POST the final result to. Three absolute requirements. <break time="1s" /> One: must be HTTPS. HTTP is rejected outright in production. <break time="1s" /> Two: must be publicly reachable. Daraja's servers call you — localhost doesn't work. In local dev, this is where ngrok comes in. <break time="1s" /> Three: must respond with HTTP two hundred within thirty seconds. If you respond with a four hundred, Safaricom marks your endpoint unhealthy. If you take too long, same thing. We'll build the callback endpoint in module five with "respond on receive" mode so it always returns two hundred instantly. <break time="1s" /> Also — Safaricom does NOT retry callbacks. If your endpoint is down when the callback is sent, you miss it. That's why module six's reconciliation workflow exists.
+
+Field ten: AccountReference. A short string you choose. Max twelve characters. Shows up on the customer's phone during the prompt and on their M-Pesa statement after. Use it to identify what they're paying for — ORDER dash one thousand and one, or STUDENT dash a-two-four, or INVOICE five-five. <break time="1s" /> Field eleven: TransactionDesc. Also customer-facing. Max thirteen characters. Something like "Course payment" or "Fees Term 2". <break time="1s" /> Both fields are strict on length. Fourteen characters in TransactionDesc returns an "Invalid Transaction Description" error. We'll enforce the limit in our validation Code node.
+
+Twelve fields. We skipped BusinessShortCode because that's field one duplicated with PartyB. Memorize this payload — you'll build it from scratch in module four, by hand, in a Code node.
+
+Next lesson: what Safaricom sends back. The callback shape has its own quirks. See you there.

@@ -1,0 +1,17 @@
+# Lesson 9.4 : Reversals and where to go next
+# Target runtime: 7 min
+# Word count: ~298
+# Paste the lines below into ElevenLabs / Murf.
+# <break time="Ns" /> tags are ElevenLabs SSML.
+
+Reversals. A customer paid in error. You want to refund the exact transaction. Daraja offers reversal within seven days of the original transaction.
+
+Payload. TransactionID is the original M-Pesa receipt number. Amount must match the original. ReceiverParty is YOUR shortcode. The reversal returns the money to the customer's phone. <break time="1s" /> Note the misspelling: "RecieverIdentifierType" with "cie" not "cei". Yes, Safaricom's API has a typo. If you spell it correctly, Daraja rejects. Not a joke.
+
+Workflow. Webhook: refund request from your admin tool. Validation: original transaction exists in our DB, not already reversed, original was successful, less than seven days ago. <break time="1s" /> Execute Workflow for auth. Build reversal payload. HTTP Request POST. Save pending reversal row. Two callback workflows for ResultURL and QueueTimeOutURL to resolve the status.
+
+Important: reversals are fraud vectors. A bad actor with access to your admin tool could refund themselves repeatedly. Always build two-person approval for reversals above a threshold. <break time="1s" /> Also log every reversal attempt with the admin user's identity. Compliance will appreciate it.
+
+Where to go next. Three directions. <break time="1s" /> One: AI nodes. n8n has OpenAI, Claude, local LLM nodes. Combine with payment data — "summarize this customer's payment history", "detect anomalies", "classify refund requests". Massive leverage. <break time="1s" /> Two: multi-tenant SaaS patterns. Build a single n8n instance that handles payments for multiple business clients. Separate credentials per tenant. Dynamic routing. A whole business model. <break time="1s" /> Three: other African payments. Airtel Money, MTN MoMo, Flutterwave, Paystack. Same patterns as Daraja — OAuth, webhook, callback — different endpoints. Easy to adapt once you've built one.
+
+Module nine done. You've seen the full Daraja landscape. One final module ahead — module ten — on how to package what you've learned into a service you can sell. See you there.

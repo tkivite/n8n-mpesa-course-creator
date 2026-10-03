@@ -1,0 +1,19 @@
+# Lesson 3.3 : Calling the auth workflow from other workflows
+# Target runtime: 6 min
+# Word count: ~387
+# Paste the lines below into ElevenLabs / Murf.
+# <break time="Ns" /> tags are ElevenLabs SSML.
+
+Quick lesson. We built a sub-workflow. Now let's see how any other workflow calls it. One node. Thirty seconds of config.
+
+New workflow. Add a manual trigger — just so we can click to run it. Then add an "Execute Workflow" action node — the one that calls another workflow by reference. <break time="1s" /> In the node config, pick the workflow from the dropdown. "Zero one dash M dash Pesa auth". That's it. No parameters to pass — our auth workflow takes no inputs. If you ever build a sub-workflow that needs inputs, you'd pass them as items here.
+
+Execute. The sub-workflow runs. Its final output appears as the input to whatever comes after the Execute Workflow node. In this case: access_token, expires_in, expires_at, and possibly cached: true. <break time="1s" /> From here, you can chain any downstream node. HTTP Request to call Daraja with that Bearer token. Code node to decorate the token with other data. Whatever your workflow needs.
+
+Here's the pattern. HTTP Request node after the Execute Workflow. Authorization header value: "Bearer" space, then an expression — curly braces dollar json dot access_token. The expression resolves at runtime to the fresh token from your sub-workflow. <break time="1s" /> This exact pattern — Execute Workflow then HTTP Request with Bearer — appears in modules four, six, and nine. Learn it once, you've learned the whole course's auth story.
+
+One more cool thing. Open executions. Click any run that used the sub-workflow. Scroll into the execution detail. You can see the sub-workflow's own nodes nested as a group inside the parent. All the data visible, all the timing visible. If auth is slow or failing, you drill in without leaving the executions view.
+
+Error handling. If the sub-workflow throws — say, Daraja returned four-oh-one — the Execute Workflow node in the caller throws too. The caller's workflow stops unless you've set it to continue on error. <break time="1s" /> For STK push, we want the caller to stop. If we can't auth, we can't push. Return an error to the frontend, don't try to continue. That's the default behavior — nothing to configure.
+
+Module three done. You have a production-quality auth sub-workflow with caching and error handling. Every other workflow in the course calls it. Next up: module four, the STK push itself. The main event. Let's go.

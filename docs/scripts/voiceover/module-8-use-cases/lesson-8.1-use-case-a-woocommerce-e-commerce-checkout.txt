@@ -1,0 +1,21 @@
+# Lesson 8.1 : Use case A : WooCommerce e-commerce checkout
+# Target runtime: 10 min
+# Word count: ~425
+# Paste the lines below into ElevenLabs / Murf.
+# <break time="Ns" /> tags are ElevenLabs SSML.
+
+Welcome to module eight. Over the next forty-five minutes we build five real integrations. Not toy examples. Working checkouts, billing, portals. Pick the one closest to your use case and ship it this week. <break time="1s" /> First up: WooCommerce. The most-requested integration in Kenya because thousands of businesses run on WordPress and WooCommerce but struggle to add real M-Pesa payments without paying monthly to a plugin.
+
+Import ecommerce dot json. Three nodes. Webhook, Code, Execute Workflow. We wire WooCommerce to fire the webhook on every new order.
+
+In WordPress admin, go to WooCommerce, Settings, Advanced, Webhooks. Add webhook. Topic: order dot created. Delivery URL: your n8n webhook. Secret: a shared random string you'll verify. <break time="1s" /> Woo fires a POST with the whole order object every time an order is placed. Our Code node extracts billing phone, total, and order ID.
+
+Code node. Pulls order from the body. Phone from billing dot phone. Amount from the order total — Woo sends it as a float with decimals; we round because Daraja wants integers. Reference WOO dash the order ID. Description "Order" space the ID. <break time="1s" /> Then returns a payload. Next node — Execute Workflow — fires our shared STK push sub-workflow with that payload. Done.
+
+One missing piece. By default, WooCommerce fires the order-created webhook after the customer clicks "place order", regardless of payment method. We want to only fire STK push when the method is "M-Pesa". <break time="1s" /> Add an IF node after the Code node. Condition: order dot payment_method equals "mpesa_custom". Only fire STK push on true. Install the "WooCommerce Payment Gateway" base plugin and register a custom gateway called "M-Pesa STK Push" that just stores the method on the order. <break time="1s" /> We don't go into the PHP plugin code in this course, but the handbook has a copy-paste snippet you can drop into functions dot php.
+
+On the callback workflow, after the DB update, add a branch. If the reference starts with WOO-, extract the order ID and call the WooCommerce REST API to update the order status to "processing" or "completed". That triggers Woo's own emails and inventory updates.
+
+Test. Add a product to a test WooCommerce store. Check out with M-Pesa. Enter your phone. Watch: Woo fires webhook, n8n fires STK push, your phone buzzes, you enter PIN, callback resolves, Woo marks order processing, customer gets email. End to end. <break time="1s" /> Four minutes of work in n8n. Zero plugin cost. Full control.
+
+One down. Next: SaaS billing. Monthly recurring charges to your customers. See you there.

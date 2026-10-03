@@ -1,0 +1,17 @@
+# Lesson 9.3 : C2B : Register URL and unprompted payments
+# Target runtime: 6 min
+# Word count: ~274
+# Paste the lines below into ElevenLabs / Murf.
+# <break time="Ns" /> tags are ElevenLabs SSML.
+
+C2B handles unprompted payments. A customer pays your till from their M-Pesa menu — "lipa na M-Pesa", "pay bill", enter your shortcode and account number. Daraja notifies you via callback. You update their account.
+
+Setup. Call the Register URL endpoint ONCE per shortcode. Give Daraja two URLs. Validation: optional pre-payment check. Confirmation: post-payment notification. ResponseType "Completed" means Safaricom auto-accepts if your validation URL is unreachable. <break time="1s" /> Build a one-shot workflow with a manual trigger that calls Register URL. Run once per environment setup.
+
+Validation workflow. Webhook receives the pre-payment payload. Code node checks: is this account number valid in our DB? If yes, respond with ResultCode zero. If no, respond with ResultCode C-two-B zero zero zero one one — a special code that tells M-Pesa to reject the payment with a specific error message to the customer. <break time="1s" /> Use this to prevent payments to non-existent accounts. The customer sees "invalid account" before they're charged. Saves refund workload.
+
+Confirmation workflow. Fires AFTER the customer has paid. Payload includes TransID, Amount, MSISDN, BillRefNumber — the account number. <break time="1s" /> Code node parses it. Postgres: insert into transactions table and update the user's account balance. Return ResultCode zero to acknowledge receipt. <break time="1s" /> Important: respond fast. Same thirty-second rule as STK callbacks. Use Response Mode "On Received".
+
+Common use case: SACCO loan repayments. Members pay via M-Pesa with their member number as the account reference. The confirmation workflow matches member number to the SACCO database and reduces their loan balance. <break time="1s" /> Fully automated. No staff tracking payments by hand. We've built this for three SACCOs.
+
+C2B covered. Final API: reversals. See you there.

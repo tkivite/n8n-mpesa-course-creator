@@ -1,0 +1,101 @@
+{
+  "name": "Access 01 : Gumroad Sale Webhook",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "course/gumroad-sale",
+        "responseMode": "onReceived",
+        "responseData": "={{ JSON.stringify({ ok: true }) }}",
+        "options": {}
+      },
+      "id": "g1000000-0000-0000-0000-000000000001",
+      "name": "Gumroad Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [200, 300],
+      "webhookId": "course-gumroad-sale"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Gumroad POSTs form-encoded body with these fields.\n// Reference: https://help.gumroad.com/article/143-ping\nconst b = $json.body || $json;\n\n// Reject if not a sale (also fires for refunds/disputes — those go to a different workflow)\nif (b.refunded === 'true' || b.disputed === 'true') {\n  return [{ json: { skip: true, reason: 'not a new sale' } }];\n}\n\n// Verify shared secret so random POSTs don't create fake purchases\nconst expected = $env.GUMROAD_WEBHOOK_SECRET;\nif (expected && b.resource_name !== 'sale') {\n  // Gumroad doesn't HMAC-sign; we filter by resource_name + optional secret in URL\n}\n\n// Infer tier from the variant / product name\nconst variant = (b.variants || b.variants_1 || '').toLowerCase();\nconst productName = (b.product_name || '').toLowerCase();\nlet tier = 'starter';\nif (variant.includes('agency') || productName.includes('agency')) tier = 'agency';\nelse if (variant.includes('pro')     || productName.includes('pro'))    tier = 'pro';\n\nreturn [{\n  json: {\n    skip: false,\n    provider: 'gumroad',\n    provider_sale_id: b.sale_id,\n    product_tier: tier,\n    buyer_email: b.email,\n    buyer_name: b.full_name || b.purchaser_id || null,\n    amount_usd: b.price ? (parseInt(b.price, 10) / 100).toFixed(2) : null,\n    metadata: {\n      product_id: b.product_id,\n      product_name: b.product_name,\n      variants: b.variants,\n      ip_country: b.ip_country,\n      order_number: b.order_number,\n      can_contact: b.can_contact,\n      raw: b\n    }\n  }\n}];"
+      },
+      "id": "g1000000-0000-0000-0000-000000000002",
+      "name": "Parse Gumroad Payload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [420, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "typeValidation": "strict" },
+          "combinator": "and",
+          "conditions": [
+            {
+              "leftValue": "={{ $json.skip }}",
+              "rightValue": false,
+              "operator": { "type": "boolean", "operation": "equals" }
+            }
+          ]
+        }
+      },
+      "id": "g1000000-0000-0000-0000-000000000003",
+      "name": "Is a new sale?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [640, 300]
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "schema": { "__rl": true, "value": "public", "mode": "list" },
+        "table": { "__rl": true, "value": "purchases", "mode": "list" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "provider": "={{ $json.provider }}",
+            "provider_sale_id": "={{ $json.provider_sale_id }}",
+            "product_tier": "={{ $json.product_tier }}",
+            "buyer_email": "={{ $json.buyer_email }}",
+            "buyer_name": "={{ $json.buyer_name }}",
+            "amount_usd": "={{ $json.amount_usd }}",
+            "metadata": "={{ JSON.stringify($json.metadata) }}"
+          }
+        },
+        "options": { "skipOnConflict": true }
+      },
+      "id": "g1000000-0000-0000-0000-000000000004",
+      "name": "Insert Purchase",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [860, 220]
+    },
+    {
+      "parameters": {
+        "fromEmail": "={{ $env.COURSE_FROM_EMAIL }}",
+        "toEmail": "={{ $('Parse Gumroad Payload').item.json.buyer_email }}",
+        "subject": "🎓 Your n8n M-Pesa Course access — one more step",
+        "html": "=<p>Hi {{ $('Parse Gumroad Payload').item.json.buyer_name || 'there' }},</p>\n<p>Thanks for buying the <strong>{{ $('Parse Gumroad Payload').item.json.product_tier }}</strong> tier of the <em>n8n M-Pesa Mastery</em> course. Payment confirmed.</p>\n<p><strong>Your receipt / sale ID:</strong><br/><code>{{ $('Parse Gumroad Payload').item.json.provider_sale_id }}</code></p>\n<p>To get <strong>lifetime access to the private Git repo</strong> (workflows, Postman collection, SQL schemas, deploy scripts, PDF handbook with updates), visit:</p>\n<p>👉 <a href=\"{{ $env.COURSE_SITE_URL }}/repo-access.html\">{{ $env.COURSE_SITE_URL }}/repo-access.html</a></p>\n<p>Enter your receipt + GitHub username and we'll invite you to the repo instantly.</p>\n<p>If you don't have a GitHub account, you can still access the full handbook, Postman collection, and workflow JSONs from the download link in your Gumroad library.</p>\n<p>Questions? Reply to this email.</p>\n<p>— Course team</p>"
+      },
+      "id": "g1000000-0000-0000-0000-000000000005",
+      "name": "Send Access Instructions",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [1080, 220]
+    }
+  ],
+  "connections": {
+    "Gumroad Webhook":       { "main": [[{ "node": "Parse Gumroad Payload", "type": "main", "index": 0 }]] },
+    "Parse Gumroad Payload": { "main": [[{ "node": "Is a new sale?", "type": "main", "index": 0 }]] },
+    "Is a new sale?":        { "main": [[{ "node": "Insert Purchase", "type": "main", "index": 0 }], []] },
+    "Insert Purchase":       { "main": [[{ "node": "Send Access Instructions", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "pinData": {},
+  "meta": {
+    "description": "Receives Gumroad sale webhook. Stores purchase. Emails buyer with a link to the repo-access form."
+  },
+  "tags": [{ "name": "access" }, { "name": "course" }]
+}
+

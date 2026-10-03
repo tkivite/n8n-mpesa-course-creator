@@ -1,0 +1,21 @@
+# Lesson 9.1 : B2C : paying money out
+# Target runtime: 10 min
+# Word count: ~507
+# Paste the lines below into ElevenLabs / Murf.
+# <break time="Ns" /> tags are ElevenLabs SSML.
+
+Welcome to module nine. STK push is for receiving money. B2C is for sending it out. Payroll. Refunds. Winnings. Loan disbursements. Same Daraja API family, slightly different mechanics. Let's cover the essentials.
+
+Key difference. STK push is customer-authorized — the customer enters their PIN. B2C is business-authorized — your business enters your initiator credentials. The customer just receives money. No action required from them. <break time="1s" /> This is powerful and dangerous. Powerful because disbursement is instant. Dangerous because a bug in your workflow could send money to the wrong recipient. Treat B2C with extra care.
+
+Prerequisites. B2C is not available in the free sandbox the same way STK push is — Safaricom gives you specific B2C test credentials. Request them from your account manager. <break time="1s" /> You need an InitiatorName, an InitiatorPassword, and a SecurityCredential. The SecurityCredential is your initiator password encrypted with Safaricom's public RSA key — SandboxCertificate dot cer for sandbox, production cert for production. One-time encryption with Node's crypto module. <break time="1s" /> You also need actual float sitting on your business till. B2C debits from this float. If float is empty, every B2C fails. We'll build a float monitor in the next lesson.
+
+The B2C payload. Notice differences from STK push. <break time="1s" /> InitiatorName and SecurityCredential replace Password and Timestamp. CommandID distinguishes business payment, salary payment, and promotional payment — each has slightly different handling. PartyA is YOUR shortcode. PartyB is the customer phone. Remarks appears on their M-Pesa statement. <break time="1s" /> QueueTimeOutURL and ResultURL — two separate callback URLs. Daraja's B2C queues the request asynchronously; the result callback fires when the actual money movement completes. Build both URLs in your workflow.
+
+The SecurityCredential one-time computation. In a Code node — or a one-off Node script — load the Safaricom certificate PEM file, encrypt your initiator password with it using RSA PKCS one padding, base-sixty-four encode the result. That's your SecurityCredential. <break time="1s" /> Compute it once per environment. Store it as an env var. Re-use forever — until the initiator password rotates. We don't want to encrypt per-request because it's expensive and the result doesn't change.
+
+Workflow sketch. Webhook triggered by whatever upstream event — refund request, payroll button click. Validate: recipient phone, amount within business limits, authorized initiator. <break time="1s" /> Execute Workflow to the auth sub-workflow we built. Build B2C payload. HTTP Request POST to the B2C endpoint. Postgres insert the pending disbursement with status "queued". <break time="1s" /> Two callback workflows: one for ResultURL on success, one for QueueTimeOutURL on timeout. Update row accordingly.
+
+Safety guardrails. Because B2C spends your money without customer confirmation. <break time="1s" /> Max amount per recipient per day. Max total disbursed per day — a circuit breaker that stops all B2C if something goes rogue. Two-person approval workflow for amounts above a threshold — the request creates a pending approval, a second user approves via a Slack button, then the actual STK fires. Audit every attempt whether successful, queued, or failed.
+
+B2C done. Next lesson: querying your float balance before you try to pay anyone. See you there.

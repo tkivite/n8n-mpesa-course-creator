@@ -1,0 +1,23 @@
+# Lesson 3.1 : Why we build a reusable auth sub-workflow
+# Target runtime: 7 min
+# Word count: ~655
+# Paste the lines below into ElevenLabs / Murf.
+# <break time="Ns" /> tags are ElevenLabs SSML.
+
+Welcome to module three. Over the next twenty-five minutes we'll build a workflow whose only job is to fetch a Daraja access token. Nothing else. And then we'll make it callable from every other workflow in the course. <break time="1s" /> Why dedicate a whole workflow to one HTTP call? Three reasons. One: every Daraja API we touch — STK push, status query, B2C, reversal — needs the same token. Writing the fetch logic once and reusing it is cleaner than copy-pasting. Two: we're going to add token caching, so we don't hit Daraja's OAuth endpoint on every single transaction. That caching logic lives in exactly one place. Three: when Safaricom eventually changes the auth mechanism — and they will — you fix one workflow, not ten.
+
+Mental model. Picture a central auth node. Every other workflow is a caller. Caller says "give me a token". Auth node says "here's one, valid for the next hour". Caller uses it. The auth node handles the cache, the HTTP call, the error paths. Everyone else stays simple. <break time="1s" /> This is the "sub-workflow" pattern in n8n. Any workflow with an "Execute Workflow Trigger" node can be called from any other workflow via the "Execute Workflow" action node. Inputs, outputs, errors — all propagate as if it were a single workflow.
+
+Let's build it. In your n8n editor, click "import from file", pick zero-one dash mpesa dash auth dot json from the course repo. The workflow appears with four nodes. We're going to go through each one, understand what it does, and then wire a caller to it.
+
+Node one: Execute Workflow Trigger. This is what makes the workflow callable from other workflows. There's no configuration — it just sits there, waiting to be invoked. The alternative would be a Webhook, but Execute Workflow Trigger is faster — no HTTP round trip. Everything stays in-process.
+
+Node two: a Code node that builds the HTTP Basic Auth header. Reads your Consumer Key and Consumer Secret from env vars. Concatenates them with a colon. Base-sixty-four encodes. Returns the string "Basic" space the encoded value — that's the exact format HTTP Basic Auth expects. <break time="1s" /> Why not use the HTTP Request node's built-in Basic Auth option? Because we also want to read the base URL from env — so switching sandbox to production is just an env change, no node edit. One Code node, two concerns, cleanly separated.
+
+Node three: HTTP Request. GET to the OAuth endpoint, with the Authorization header we just built. Timeout: ten seconds — generous, but we never want to hang the caller forever. If Daraja is down, we want to fail fast and let the caller decide what to do. <break time="1s" /> Expected response: a JSON object with "access_token" and "expires_in". The expires_in is almost always three-five-nine-nine seconds — one second shy of an hour. That one-second gap is Safaricom being paranoid about clock drift.
+
+Node four: Return Token. Simple Code node that pulls access_token and expires_in out of the HTTP response, computes an absolute expires_at timestamp, and returns them. The caller — our STK push workflow — only cares about the access_token string, but having expires_at available means we can later add caching with no API change. <break time="1s" /> Also throws a clear error if the response doesn't contain an access_token. If Daraja returns an error page or a rate-limit response, we fail loud. Silent failures in payment systems are how you lose money.
+
+Click execute. The workflow runs. Four green checkmarks. Click the last node — Return Token — and you see a real access_token string. Copy it, head to Postman, you can use it to hit any Daraja endpoint for the next hour.
+
+Next lesson: we add caching. Right now every call to this workflow hits Daraja. Sixty transactions a minute means sixty OAuth calls. We're about to make it one OAuth call an hour, no matter the traffic. See you there.

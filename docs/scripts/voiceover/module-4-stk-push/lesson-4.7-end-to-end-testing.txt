@@ -1,0 +1,17 @@
+# Lesson 4.7 : End-to-end testing
+# Target runtime: 5 min
+# Word count: ~177
+# Paste the lines below into ElevenLabs / Murf.
+# <break time="Ns" /> tags are ElevenLabs SSML.
+
+Final lesson of module four. We tie it all together. Postman, workflow, database, Daraja dashboard. Four tests, five minutes.
+
+Test one: happy path. Postman request "Trigger STK Push via n8n". Body: your phone number, amount one, reference TEST dash one. Send. <break time="1s" /> Response: success true, checkout request ID populated. Phone buzzes within three seconds. Database query: one row, status pending.
+
+Test two: invalid phone. Body: phone zero-one-two. Send. Response: five hundred, error "Invalid phone number". Database: no new row. Daraja: never hit. Validation did its job.
+
+Test three: amount over limit. Body: valid phone, amount seventy-five thousand. Response: five hundred, error "exceeds M-Pesa transaction limit". Daraja: never hit.
+
+Test four: deliberately break the config. Temporarily unset MPESA_PASSKEY. Restart docker compose. Fire a valid request. Response: five hundred, error "MPESA_PASSKEY env var not set". Clear error, no mystery. <break time="1s" /> Restore the env var. Restart. Fire again. Working.
+
+Module four complete. You've built the heart of an M-Pesa integration. Next up: module five, the callback handler. The piece that turns "pending" into "paid". See you there.

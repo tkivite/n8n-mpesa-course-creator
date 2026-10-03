@@ -1,0 +1,19 @@
+# Lesson 7.3 : Rate limiting and abuse prevention
+# Target runtime: 7 min
+# Word count: ~369
+# Paste the lines below into ElevenLabs / Murf.
+# <break time="Ns" /> tags are ElevenLabs SSML.
+
+If your webhook is public — which it must be — bots will find it. Not malicious bots necessarily. Just the Internet's background hum of scanners. Plus the one angry customer who thinks spamming "pay" fifty times will somehow work. Rate limiting at Nginx stops both.
+
+At the top of your Nginx config, define two zones. "stk" allows five requests per second per IP, with a ten-megabyte memory bucket — enough for about one hundred and sixty thousand distinct IPs. "webhook_general" allows twenty per second for other endpoints. <break time="1s" /> Five per second per IP is generous for real users and brutal for bots. A real customer clicks "pay" once. A bot hammering tries hundreds per second.
+
+Apply the zone to the STK push location. Burst ten means allow sudden spikes of up to ten extra requests before enforcing the rate. <break time="1s" /> Important: do NOT rate-limit the callback endpoint. Safaricom legitimately bursts callbacks when many customers pay simultaneously. Limiting that endpoint would drop legitimate callbacks and cost you money. <break time="1s" /> Reload Nginx: nginx dash s reload. Rate limiting is live.
+
+Second layer: fail2ban. Blocks IPs that fail SSH login three times in ten minutes for an hour. Prevents brute-force logins against your VPS. <break time="1s" /> You can also configure fail2ban to watch Nginx logs for excessive four-hundreds and ban those IPs. More complex, but worth it on exposed webhooks.
+
+Third layer: webhook authentication. In the Webhook node, Authentication dropdown has "Header Auth" option. Set a required header — like X dash API dash key — and a required value. Any request without that header gets a four-oh-one. Any request from your frontend includes the header. Simple shared secret. <break time="1s" /> Not world-class security — the key is in your frontend's JavaScript if it's a browser app, so anyone can extract it. But it filters out ninety-nine percent of random Internet traffic, which is the actual threat here.
+
+Firewall review. UFW allow SSH, eighty, four four three. Nothing else. In particular, do NOT expose Postgres port five four three two publicly. If you ever need remote DB access, SSH tunnel in — never open the port.
+
+Abuse prevention done. Next: knowing when something breaks. See you there.

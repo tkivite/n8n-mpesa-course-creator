@@ -1,0 +1,21 @@
+# Lesson 4.1 : Designing the webhook endpoint
+# Target runtime: 7 min
+# Word count: ~474
+# Paste the lines below into ElevenLabs / Murf.
+# <break time="Ns" /> tags are ElevenLabs SSML.
+
+Welcome to module four, the main event. In the next hour we build the production-grade STK Push workflow. Not a demo. The one you'd deploy to a client. It validates input, generates the password, calls Daraja, stores the transaction, and returns a response your frontend can act on.
+
+First: the API contract. Your frontend will POST four fields. Phone in any format we can parse — the normalization lives in our workflow, not the frontend. Amount as an integer. Reference, which shows up on the customer's M-Pesa statement. Description, which shows up during the prompt. <break time="1s" /> Why so few fields? Keep the frontend dumb. The more it does, the more places bugs can hide. We validate centrally in one workflow and give the frontend a clean response to render.
+
+Response contract. Four fields. Success boolean so the frontend can show a checkmark or an error. Message for user-facing text. Checkout request ID so the frontend can poll status if it wants. Reference echoed back so the frontend can correlate. <break time="1s" /> Importantly: this response fires before the customer has even entered their PIN. All it means is "STK prompt sent successfully". The actual payment result arrives later via callback. Your frontend UX needs to reflect that: show "check your phone" after this response, then transition to "paid" only when your backend confirms the callback.
+
+Build time. Blank workflow. Add a Webhook node. Path: mpesa slash stk dash push. Method: POST. Response Mode: last node — meaning the final node's output becomes the HTTP response. Authentication: none for now, we'll add it in module seven.
+
+n8n gives you two URLs: a test URL that fires once per click, and a production URL that fires forever when the workflow is active. We'll use the production URL via the Postman collection in a few minutes. <break time="1s" /> Important detail: webhook paths are relative to your n8n host. Locally that's localhost five-six-seven-eight slash webhook slash mpesa slash stk dash push. On your VPS it's your domain slash the same path. The frontend's "pay" button targets whichever one you deploy to.
+
+Quick note on CORS. If your frontend lives on a different origin — react dot yoursite dot com calling api dot yoursite dot com — browsers block the request unless you return CORS headers. <break time="1s" /> In the Webhook node, under "Options", add "Response Headers". Set Access-Control-Allow-Origin to your frontend's origin, or star for development. Add Access-Control-Allow-Methods: POST, OPTIONS. If the browser sends an OPTIONS preflight, n8n handles it automatically.
+
+Save. Name it zero two dash STK push. Workflow saved but not yet active. We'll activate it after we've built and tested the full chain.
+
+Next lesson: input validation. The code that rejects a nineteen-shilling payment, a Nigerian phone number, a thirty-character reference. Three minutes of logic that saves hundreds of support tickets. See you there.

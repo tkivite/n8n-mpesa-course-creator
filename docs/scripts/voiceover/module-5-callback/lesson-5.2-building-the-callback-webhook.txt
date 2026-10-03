@@ -1,0 +1,25 @@
+# Lesson 5.2 : Building the callback webhook
+# Target runtime: 10 min
+# Word count: ~584
+# Paste the lines below into ElevenLabs / Murf.
+# <break time="Ns" /> tags are ElevenLabs SSML.
+
+New workflow. Import zero three dash stk dash callback dot json from the course repo. Six nodes.
+
+Node one: Webhook. Path matches what we set in our callback URL — mpesa slash stk dash callback. Method POST. Critical setting: Response Mode "On Received". <break time="1s" /> On Received means: the moment the request arrives, send back a two hundred OK. Don't wait for downstream nodes to finish. Don't wait for the database write. Nothing. Just acknowledge, and process asynchronously. <break time="1s" /> This is the single most important setting in this workflow. If you leave it on default — "last node" — Safaricom's thirty-second timeout kicks in when your database is slow and you lose callbacks. Set it to On Received. Move on.
+
+Response Data: Safaricom expects you to acknowledge with a JSON body containing ResultCode zero and ResultDesc "Accepted". It's not strictly enforced — a plain two hundred would work — but it's the documented format. Follow it.
+
+Node two: Parse Callback. The gnarly nested structure we studied in lesson two point five. First, drill into Body dot stkCallback. If it's missing, throw — not a valid callback. <break time="1s" /> If CallbackMetadata exists — meaning payment succeeded — iterate its Item array and flatten into a plain object keyed by Name. Now meta dot MpesaReceiptNumber is directly accessible instead of iterating. <break time="1s" /> Return a flat, friendly object with all the fields we care about: checkout request ID for matching, status, amount, receipt, phone. Plus "raw" for the audit trail.
+
+Node three: Postgres, operation "execute query". Update the row where checkout_request_id matches, set status, result_code, result_desc, receipt number, transaction date. Return the updated row so downstream nodes can use it. <break time="1s" /> Why update by checkout_request_id? Because that's the one identifier that's in both the STK push response and the callback. Safaricom guarantees it. Our schema has it unique indexed. One row updated per callback.
+
+Important consideration: idempotency. Safaricom doesn't retry, but weird things happen. A reconciliation query might also update the row seconds before the callback arrives. Or someone pokes your callback URL with Postman as a test. <break time="1s" /> Defensive move: add "AND status equals pending" to the WHERE clause. This way, if the row already has a resolved status, the update is a no-op. Zero rows returned. Downstream nodes see no data and skip the notification. No double receipts to the customer. <break time="1s" /> I'd call this a production-grade upgrade. Add it when you deploy.
+
+Second database write — the audit trail. Insert the raw callback payload into our mpesa_callbacks table. Never update that table. Append only. If a customer disputes a transaction two years from now, the full original Safaricom payload is still exactly there. <break time="1s" /> Compliance teams love this. Finance teams love this. You should love this. One extra Postgres node, you're bulletproof.
+
+Node four: an IF node. True branch for success. False branch for failures. We branch here because the handling is different. Success triggers a confirmation to the customer. Failure triggers an internal alert.
+
+Success branch: Code node that builds a confirmation payload. Pull the row we just updated for the reference. Pull the parsed callback for the receipt and amount. Build a string: "Hi, we received your payment of KES amount. Receipt: receipt. Reference: reference. Thank you." <break time="1s" /> This payload then feeds into Email, SMS, WhatsApp — whatever channel you use. We'll wire up WhatsApp in module eight.
+
+Callback captured, DB updated, audit logged, branches split. Next lesson, we send the customer a confirmation.

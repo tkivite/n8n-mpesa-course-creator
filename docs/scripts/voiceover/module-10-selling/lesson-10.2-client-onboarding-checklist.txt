@@ -1,0 +1,19 @@
+# Lesson 10.2 : Client onboarding checklist
+# Target runtime: 7 min
+# Word count: ~323
+# Paste the lines below into ElevenLabs / Murf.
+# <break time="Ns" /> tags are ElevenLabs SSML.
+
+Delivering twenty M-Pesa integrations profitably means doing them the same way every time. Here's the checklist I use. Ten items. From signed proposal to go-live in five business days.
+
+Day one. Forty-five-minute call. Ask about business model, projected volume, current M-Pesa handling if any, integration targets, timeline, budget. <break time="1s" /> One slide at the end of the call: here's what I recommend, here's the tier, here's the price. If they say yes verbally, send the proposal within two hours. Momentum.
+
+Day two. NDA first if they haven't shared production credentials before. Then Daraja production Consumer Key, Secret, Passkey, Shortcode. Domain and DNS access, or you provision the VPS yourself and charge for it. <break time="1s" /> Use a secure channel for secrets. 1Password shared vault, Bitwarden Send, or at minimum encrypted email. Never Slack DMs or regular email.
+
+Days three and four. VPS provisioning. Workflow import. Customization. Internal testing. One real production test with one shilling. <break time="1s" /> Keep a per-client git repo private fork of the course repo. Any customization goes there. Commit, push, tag. If the client's workflow ever breaks, you can diff against the baseline and know what changed.
+
+Day five. Sixty-minute walkthrough with their lead developer. Walk them through each workflow. Walk them through the monitoring dashboard. Hand over the runbook. Confirm warranty and support terms. Collect payment. <break time="1s" /> Important: collect payment on day five, not later. Deliver value. Ask for payment. Most clients pay same-day if the delivery is clean.
+
+Scope creep traps to avoid. "Can you add just one more thing" — treat as a change order with a new price. "Can we test for another week" — the warranty clock starts regardless. "We also need SMS" — great, that's a new workflow at twenty-five thousand. <break time="1s" /> Be friendly but firm. Clients respect clear boundaries. The ones who don't aren't clients you want.
+
+Onboarding done. Final lesson: how to white-label and resell. See you there.

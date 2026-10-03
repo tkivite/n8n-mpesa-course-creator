@@ -1,0 +1,21 @@
+# Lesson 1.2 : Self-hosted vs n8n Cloud
+# Target runtime: 5 min
+# Word count: ~480
+# Paste the lines below into ElevenLabs / Murf.
+# <break time="Ns" /> tags are ElevenLabs SSML.
+
+Before we install anything, let's answer the question I get asked most: should I use n8n Cloud or self-host? The answer, for M-Pesa specifically, is almost always self-host. Let me show you why.
+
+n8n Cloud is beautifully simple. You sign up, you get a hosted instance, Safaricom callbacks hit a public URL that already has HTTPS. No server management. The Starter plan is twenty dollars a month for twenty-five hundred executions. Pro is fifty dollars a month for ten thousand. <break time="1s" /> Now, here's the problem for payments. Every M-Pesa transaction uses roughly three to four executions. The webhook that triggers it. The auth sub-workflow. The STK push itself. The callback. So that ten thousand executions a month only covers about twenty-five hundred transactions.
+
+Compare that to self-hosting. A Hetzner CPX11 costs about five dollars a month. Two CPU cores. Two gigs of RAM. Twenty terabytes of traffic. On that box, n8n will happily handle a hundred thousand executions a day. For most Kenyan businesses, that's effectively unlimited. <break time="1s" /> DigitalOcean, Vultr, Linode — all have similar five-to-six-dollar plans. The point is, five dollars a month gets you a server that outperforms n8n Cloud's fifty-dollar plan by about a hundred times.
+
+So when does n8n Cloud make sense? Three cases. One: you're prototyping and want to be live in five minutes. Two: your business genuinely does under a hundred transactions a day and you don't want to think about servers. Three: your team has zero DevOps capacity and the time saved is worth more than the money spent. <break time="1s" /> For everyone else — self-host. And here's the kicker: in module seven I give you a one-command deploy script that provisions a Hetzner VPS with n8n, Postgres, Nginx, HTTPS, and firewalls, in about five minutes. The "self-hosting is scary" argument goes away.
+
+Here it is. One command. You run this on a fresh Ubuntu server, give it your domain and your email, and five minutes later you have a production-ready n8n instance with a valid TLS certificate. We'll do this together in module seven, but I want you to see it now so the fear is already gone.
+
+One more number. Over twelve months, processing ten thousand transactions a month, n8n Cloud costs six hundred dollars. Self-hosted on Hetzner costs sixty. That's five hundred and forty dollars a year back in your pocket. If you're running an agency with five M-Pesa clients, that's twenty-seven hundred dollars a year.
+
+There's also a security angle. When you self-host, your Daraja Consumer Key and Secret live only on your server. They're never sent to a third party. For businesses handling customer financial data under Kenya's Data Protection Act, that's a compliance win worth having.
+
+Verdict: self-host. In the next lesson, I'll show you the Docker Compose file we'll use for the rest of the course. Sixty seconds to running n8n. Let's go.

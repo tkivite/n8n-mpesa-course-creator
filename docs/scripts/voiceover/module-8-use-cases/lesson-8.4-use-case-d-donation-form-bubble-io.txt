@@ -1,0 +1,19 @@
+# Lesson 8.4 : Use case D : Donation form (Bubble.io)
+# Target runtime: 8 min
+# Word count: ~326
+# Paste the lines below into ElevenLabs / Murf.
+# <break time="Ns" /> tags are ElevenLabs SSML.
+
+Fourth use case. Donations. A NGO or church wants a one-click donation page. Bubble.io, WeWeb, or Softr for the frontend — no code — plus our n8n backend for the actual payment.
+
+Bubble.io page. Three elements. A text input for amount with suggested buttons — one hundred, five hundred, one thousand. A phone input. A "donate now" button. <break time="1s" /> On button click: Bubble sends an API request to our n8n webhook with amount and phone. Receives back the success response. Shows the "check your phone" screen. <break time="1s" /> Bubble API Connector plugin handles this. Documentation link in the handbook.
+
+Workflow. Donation webhook receives phone, amount, optional name, optional cause. Validate. Fire STK push with reference DON dash current timestamp. <break time="1s" /> On the callback workflow, if reference starts with DON-, send a thank-you WhatsApp message. Also update a Supabase "donations" table with donor name and amount, for the running total display.
+
+Running total. The Bubble page displays "KES x raised so far" using a Supabase query. Updates in real-time as donations come in. Great social proof. <break time="1s" /> Supabase row-level security policy: anonymous can SELECT the aggregate but can't SELECT individual rows with donor names. Protects privacy, shows the number.
+
+Thank-you message. In the callback branch for DON references, call the WhatsApp Cloud API template. Template: "Thank you for your generous donation of KES amount. May you be blessed." <break time="1s" /> Pre-approved template in Meta Business. First-time setup takes a day. After that, every donor receives the message within seconds of completing payment.
+
+Weekly report workflow. Every Monday at eight AM, email the organization a list of donations from the previous week. Grouped by cause if you have multiple campaigns. Total raised. Top donors — if they consented to being named. <break time="1s" /> Builds a feedback loop. Volunteers see impact. Keeps engagement high.
+
+Four down. Final use case next: a WhatsApp chatbot where customers can pay by typing "pay five hundred". See you there.

@@ -1,0 +1,23 @@
+# Lesson 5.1 : Exposing a public callback URL
+# Target runtime: 10 min
+# Word count: ~577
+# Paste the lines below into ElevenLabs / Murf.
+# <break time="Ns" /> tags are ElevenLabs SSML.
+
+Welcome to module five. Over the next forty-five minutes we build the callback handler — the webhook that Safaricom hits with the final result of every STK push. Pending becomes paid. Paid becomes revenue. This is where the magic hardens into reality. <break time="1s" /> First problem: Safaricom's servers can't reach your laptop. We need a public URL. Three options, in increasing order of production-worthiness.
+
+Option one: ngrok. For local dev. In our docker-compose, there's an ngrok service behind a profile. Run docker compose dash dash profile tunnel up dash d. ngrok starts, opens a tunnel to your n8n container, and spits out a public URL in the logs. <break time="1s" /> You need an ngrok auth token — free from dashboard dot ngrok dot com. Paste it into NGROK_AUTHTOKEN in dot env. On the free tier, the URL changes every restart. For paid plans — eight dollars a month — you get a reserved subdomain that stays the same forever.
+
+Grab the HTTPS URL from the ngrok logs. Looks like random dash subdomain dot ngrok dash free dot app. Paste it into MPESA_CALLBACK_BASE_URL in dot env. <break time="1s" /> Restart n8n so the env change is picked up. docker compose up dash d — Docker only recreates services whose env changed.
+
+Verify from outside your network. From a different machine, or just your phone's cellular connection, hit the ngrok URL plus slash webhook slash something. Should get an n8n response. If you get a connection refused, the tunnel isn't up. <break time="1s" /> ngrok inspector at port forty forty is useful — docker compose logs show the URL, inspector shows every request that comes through. Great for debugging callbacks.
+
+Option two: Cloudflare Tunnel. Free. Gives you a stable subdomain on your own Cloudflare account. No account expiry anxiety. If you already use Cloudflare DNS, this is cleaner than ngrok. <break time="1s" /> Setup: install cloudflared, run cloudflared tunnel login, create a tunnel, map it to localhost five-six-seven-eight. Cloudflare gives you a stable URL. Three commands. Documented in the handbook.
+
+Option three: a real VPS with a real domain. The only option acceptable for production, because that's what Safaricom requires for go-live. <break time="1s" /> Our vps-setup script, which we'll run together in module seven, provisions a Hetzner box, installs n8n, Nginx, and Let's Encrypt certs in one command. Point your DNS at the box's IP, run the script, you're live in five minutes.
+
+Important: your callback URL is passed in every single STK push payload, as the CallBackURL field. Not registered once with Daraja. Passed per request. That means you can have different callback URLs for different workflows, if you ever need to. <break time="1s" /> We built this into the payload Code node in module four. It reads MPESA_CALLBACK_BASE_URL from env and appends slash webhook slash m pesa slash s t k dash callback. Change the env, change the URL. No code edit.
+
+One production consideration. Some Safaricom shortcodes require you to tell them which IP will receive callbacks, so they can whitelist you. Other shortcodes don't care. Check with your business account manager during go-live. <break time="1s" /> If they require it, you give them your VPS's IP. Hetzner, DigitalOcean — all these providers give you a static IP by default. You can also narrow your firewall so only Safaricom's known IPs can POST to your callback endpoint. The handbook has their current IP ranges.
+
+URL exposed. Next lesson, we build the callback webhook that receives Safaricom's POST. See you there.

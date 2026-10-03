@@ -1,0 +1,17 @@
+# Lesson 6.1 : Why reconciliation matters
+# Target runtime: 6 min
+# Word count: ~475
+# Paste the lines below into ElevenLabs / Murf.
+# <break time="Ns" /> tags are ElevenLabs SSML.
+
+Welcome to module six. In production, roughly one to three percent of Safaricom callbacks never arrive. Network blips. Your server was redeploying. ngrok tunnel reset. Someone's upstream load balancer glitched. These transactions get stuck as "pending" forever if you rely only on callbacks. <break time="1s" /> This module solves that. We build a workflow that polls Daraja for the real status of every pending transaction and reconciles your database. Set and forget. Sleeps while you sleep.
+
+Here's the mental model. Callback is the fast path — ninety-seven percent of transactions resolve in two to three seconds via callback. Reconciliation is the slow path — one to three percent resolve within five minutes via polling. Together, you catch one hundred percent of transactions. <break time="1s" /> If you only have callbacks, you lose three percent of your revenue to confused customers who paid but your system says they didn't. If you only have polling, every transaction takes thirty seconds to resolve, which feels broken. You need both.
+
+The tool is stkpushquery. POST endpoint. You give it a BusinessShortCode, a Password, a Timestamp — same formula as STK push — and a CheckoutRequestID. <break time="1s" /> Response: a ResultCode and ResultDesc using the same code table as callbacks. Zero for success. One-oh-three-two for cancelled. Etcetera. The response is synchronous — no callback for the query itself.
+
+Three gotchas before we write code. <break time="1s" /> One: stkpushquery only works for transactions less than about two hours old. After that, Safaricom's system no longer has state for the CheckoutRequestID. For older stuck transactions, there's no API — you'd have to go to Safaricom support with the receipt. That's why our reconciliation workflow filters by created_at within twenty-four hours — not realistic to recover older, but a safety ceiling. <break time="1s" /> Two: if the transaction is still being processed — customer is literally in the middle of entering PIN — Daraja returns a ResultCode of "transaction being processed". Treat this as "still pending, try again later". Don't mark it failed. <break time="1s" /> Three: rate limits. Don't poll aggressively. If you have five hundred pending transactions and query all of them every five seconds, Safaricom will rate limit you. We'll poll every five minutes with a two-minute minimum age. Reasonable.
+
+Design choice. The response from stkpushquery has the same ResultCode semantics as the callback. We can reuse the same status mapping logic. So when a reconciliation query resolves, we update the row the same way the callback would have. The customer gets the same confirmation. Downstream reporting doesn't care which path resolved it. <break time="1s" /> Beautiful consequence: your code treats callback and reconciliation as interchangeable. Add a column to the transaction table called "resolved_by" with values "callback" or "reconciliation" if you want to know how each one was resolved. Optional, but useful for monitoring.
+
+Next lesson, we build the workflow. See you there.

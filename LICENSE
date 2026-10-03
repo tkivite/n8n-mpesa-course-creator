@@ -1,0 +1,42 @@
+MIT License (Code & Workflow Templates Only)
+
+Copyright (c) 2026 <Your Name>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software, workflow JSON files, SQL schemas, deployment scripts, and
+associated code artifacts (the "Code"), to deal in the Code without
+restriction, including without limitation the rights to use, copy, modify,
+merge, publish, distribute, sublicense, and/or sell copies of the Code, and
+to permit persons to whom the Code is furnished to do so, subject to the
+following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Code.
+
+THE CODE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE CODE OR THE USE OR OTHER DEALINGS
+IN THE CODE.
+
+================================================================================
+COURSE CONTENT LICENSE (Videos, PDFs, Handbook, Slides)
+================================================================================
+
+All video lessons, PDF handbooks, course slides, diagrams, and written
+educational content distributed alongside this repository are the
+proprietary intellectual property of the author and are licensed to
+individual course purchasers for personal, non-transferable use only.
+
+You MAY NOT:
+  - Redistribute, resell, or share course videos or PDFs
+  - Upload content to public platforms (YouTube, Scribd, Telegram groups, etc.)
+  - Use course materials for competing paid training
+
+You MAY:
+  - Use the code artifacts and workflow JSONs in your own commercial projects
+  - Reference the course publicly and link back to it
+  - Share screenshots or short clips (<30 seconds) for review purposes
+

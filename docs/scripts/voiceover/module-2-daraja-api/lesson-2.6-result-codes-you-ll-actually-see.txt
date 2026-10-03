@@ -1,0 +1,21 @@
+# Lesson 2.6 : Result codes you'll actually see
+# Target runtime: 5 min
+# Word count: ~346
+# Paste the lines below into ElevenLabs / Murf.
+# <break time="Ns" /> tags are ElevenLabs SSML.
+
+Safaricom documents dozens of result codes. In practice, you'll see twelve. Memorize these — they come up in support tickets constantly.
+
+Zero: success. The customer entered their PIN, the money moved. Mark the transaction paid, send a receipt, celebrate. In sandbox, with the test number, this is what you'll see most of the time.
+
+One: insufficient funds. Customer tried to pay but didn't have the balance. Not your fault. In your UI, show a friendly "please top up and try again". Don't retry automatically — the result code was clear.
+
+Seventeen and twenty are transient failures on Safaricom's side. Seventeen is "internal M-Pesa error". Twenty is "unable to lock subscriber" — means the customer is in the middle of another transaction. Both are safe to retry — give it thirty seconds, then query status via stkpushquery. If still failing, log and move on.
+
+One-oh-three-two: user cancelled. They pressed cancel on their phone instead of entering PIN. This is a hard no. Mark the transaction cancelled, do not retry — if you resend an STK push after they explicitly cancelled, they'll be annoyed. <break time="1s" /> UX recommendation: in your app, show "payment cancelled" with a "try again" button. Let the user choose to retry.
+
+One-oh-three-seven: DS timeout. User didn't enter PIN within sixty seconds. Phone was in their pocket, they got distracted, whatever. Treat this like cancellation — mark it timeout, let them retry.
+
+Two thousand one: wrong PIN. User typed the wrong M-Pesa PIN. Daraja won't retry — you'd have to send a fresh STK push, and if you do that automatically, the customer may be annoyed. UX: show "incorrect PIN, try again?" with a retry button.
+
+One pattern across all these codes. Zero is success. One, two thousand one, and one-oh-three-two are "don't retry". Seventeen and twenty are "retry once". Everything else — log it, surface it in your dashboard, and investigate manually. <break time="1s" /> The handbook PDF in your repo has the complete table with recommended handling. Keep it bookmarked. Next lesson: common pitfalls that waste days when you don't know about them.

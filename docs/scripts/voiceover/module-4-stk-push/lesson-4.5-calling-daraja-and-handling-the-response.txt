@@ -1,0 +1,23 @@
+# Lesson 4.5 : Calling Daraja and handling the response
+# Target runtime: 9 min
+# Word count: ~572
+# Paste the lines below into ElevenLabs / Murf.
+# <break time="Ns" /> tags are ElevenLabs SSML.
+
+Add an HTTP Request node after Build STK Payload. This is the node that actually hits Safaricom's servers.
+
+Method POST. URL: an expression — curly braces dollar json dot url — because we built the URL in the previous node. Same for Authorization: dollar json dot authHeader. <break time="1s" /> Content-Type: application json. Body: specify JSON, then the expression curly braces JSON dot stringify dollar json dot payload. We stringify so the entire payload object becomes the raw request body. <break time="1s" /> Timeout: fifteen seconds. Daraja is usually fast but occasionally slow. Fifteen seconds is long enough for ninety-nine point nine percent of real responses and short enough that if something hangs, we don't block the webhook forever.
+
+Open Settings on the HTTP Request node. "On Error": set to "continue using error output". This gives the node two output ports. Success goes out the top. Errors — timeouts, network failures, five-hundred responses — go out the bottom. <break time="1s" /> We want this because we're going to save every attempted transaction to the database, including failed attempts. The error branch feeds into the same "save transaction" node with a status of "failed-to-send".
+
+Fire a test request from Postman. Watch the HTTP Request node light up. Click it. The response has three fields that matter: ResponseCode zero for success, CheckoutRequestID — the ID we use to match callbacks later — and CustomerMessage, which Safaricom gives you to show to the user.
+
+ResponseCode zero is important. It only means "request accepted" — not "payment completed". The actual payment happens asynchronously on the customer's phone. We'll handle that in module five. <break time="1s" /> CheckoutRequestID looks like "w s underscore C O underscore" followed by a long string. Capture it. Store it. It's the primary key you'll use to match callbacks back to this request.
+
+Not every response is success. Here are the three errors you'll see most. Five hundred dot zero zero one dot one zero zero one: invalid credentials — your token is stale or wrong. Four hundred dot zero zero two dot zero two: bad request — usually a malformed field. Five hundred dot zero zero one dot one zero three two: invalid timestamp — clock drift. <break time="1s" /> Each of these should land in a database row with status "failed" and the error code logged. Your support team can look at the row and know exactly what went wrong without reading Daraja logs.
+
+One more node. A Code node called "Build API Response" after the HTTP Request. This translates Daraja's response into our clean API contract we designed in lesson one. Success boolean derived from ResponseCode. Message from CustomerMessage or errorMessage. Checkout request ID, reference, phone, amount — the data your frontend needs. <break time="1s" /> Return this as the last node's output. Because the webhook is set to "last node" response mode, this becomes the HTTP response your frontend receives.
+
+End to end test. Hit the webhook URL from Postman with a valid payload. The chain fires: webhook, validate, auth, build payload, HTTP, build response. The last node returns the clean JSON, which Postman displays. <break time="1s" /> And — if you used your real phone number — your phone just vibrated with an STK prompt. Enter PIN. Daraja moves money. But we won't see the callback yet because we haven't built the callback workflow. That's module five.
+
+We have a working STK push. Next lesson: persist every attempt to Postgres. See you there.

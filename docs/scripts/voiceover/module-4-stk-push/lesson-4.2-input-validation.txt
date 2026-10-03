@@ -1,0 +1,23 @@
+# Lesson 4.2 : Input validation
+# Target runtime: 8 min
+# Word count: ~528
+# Paste the lines below into ElevenLabs / Murf.
+# <break time="Ns" /> tags are ElevenLabs SSML.
+
+After the webhook, add a Code node. Rename it "Validate Input". This is where every piece of untrusted input from the outside world gets scrubbed before it ever touches Daraja.
+
+Phone normalization first. Grab the body, treat it as a string, strip everything that isn't a digit. Then handle the three common formats: zero-seven-one-two gets its zero replaced with two-five-four. Plus-two-five-four-seven loses the plus. Bare seven or one gets two-five-four prepended. <break time="1s" /> Final check: must match two-five-four followed by seven or one, followed by exactly eight more digits. Thirteen characters total. If not, throw a clear error. The thrown error becomes the HTTP response because we didn't set the webhook to swallow errors.
+
+Amount next. Parse as integer. Reject anything less than one — Daraja's minimum. Reject anything over seventy thousand — Daraja's per-transaction cap for most shortcodes. <break time="1s" /> Important: use parseInt base ten. JavaScript's loose number parsing has edge cases. One hundred point five becomes one hundred — a free fifty-cent discount for the customer. Don't be the business that gave away forty thousand shillings to a sneaky frontend.
+
+Reference and description. Both have strict length limits imposed by Daraja — twelve characters for reference, thirteen for description. <break time="1s" /> We slice to the max rather than reject. If the frontend sends twenty characters, we take the first twelve. Debatable — some would reject. I prefer slice because it's a better user experience and the customer still sees enough context. <break time="1s" /> Also note: if the frontend forgets to send a reference, we generate one — ORDER dash current-time-in-milliseconds. Prevents null references in the database.
+
+Return the four cleaned fields. That's the whole Code node. About twenty lines of logic. Nothing clever. Just a wall of defensive checks between the outside world and your money-moving code.
+
+Let's test. Open the Postman collection. Fire the "trigger STK push via n8n" request with phone "zero-one-two". Should fail. Response: four hundred, with message "Invalid phone number". <break time="1s" /> Now send a valid phone and amount zero. Should fail with "amount must be positive". <break time="1s" /> Finally send phone zero-seven-one-two-three-four-five-six-seven-eight, amount one hundred. Validation passes — but the next node will fail because we haven't built it yet. That's fine.
+
+Four more validations you might add, depending on your use case. Max amount per phone per day — prevents fraud with a cap, say ten thousand shillings per phone per day. Reference uniqueness — reject if the same reference already exists in the database. Rate limit per IP — prevents a bot from hammering your endpoint. And phone-belongs-to-user — if you have authenticated users, require the phone to match the one on their profile. <break time="1s" /> We keep it simple in this course. You can add these as a Postgres lookup after the validation Code node — same pattern.
+
+Debugging tip. When validation fails during development, open the executions tab. Click into the failed run. Click the Validate Input node. You see the exact input that caused the throw. No guessing. In Spring Boot, you'd be grepping logs.
+
+Validation done. Next lesson, we wire in the auth sub-workflow from module three. Thirty seconds of config. See you there.

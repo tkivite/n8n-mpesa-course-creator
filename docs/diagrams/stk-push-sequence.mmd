@@ -1,0 +1,25 @@
+sequenceDiagram
+    autonumber
+    participant U as Customer
+    participant F as Frontend
+    participant N as n8n Workflow
+    participant D as Daraja
+    participant P as Customer Phone
+
+    U->>F: Click "Pay with M-Pesa"
+    F->>N: POST /webhook/mpesa/stk-push<br/>{phone, amount, ref}
+    N->>N: Validate input
+    N->>D: GET /oauth/v1/generate
+    D-->>N: access_token
+    N->>N: Build password (shortcode+passkey+ts)
+    N->>D: POST /stkpush/v1/processrequest
+    D-->>N: CheckoutRequestID
+    N-->>F: {success:true, checkout_request_id}
+    F-->>U: "Check your phone"
+    D->>P: STK prompt
+    U->>P: Enter PIN
+    P->>D: PIN confirmed
+    D->>N: POST /webhook/mpesa/stk-callback<br/>{ResultCode:0, Receipt}
+    N->>N: Update DB → status=success
+    N-->>U: Send confirmation (SMS/WhatsApp)
+

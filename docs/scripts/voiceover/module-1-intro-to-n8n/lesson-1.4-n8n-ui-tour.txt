@@ -1,0 +1,29 @@
+# Lesson 1.4 : n8n UI tour
+# Target runtime: 8 min
+# Word count: ~790
+# Paste the lines below into ElevenLabs / Murf.
+# <break time="Ns" /> tags are ElevenLabs SSML.
+
+In this lesson, I'm going to walk you through every corner of the n8n interface. By the end, you'll know where every setting lives, so when I say "open credentials and add a Postgres connection", you don't have to go searching.
+
+Left sidebar, top item: Workflows. This is your list of automations. Each workflow is a separate URL, a separate execution history, a separate set of nodes. Think of each one as a tiny microservice. <break time="1s" /> You can tag workflows for organization. In this course, every workflow I give you is tagged "mpesa" and "course". When you have twenty workflows, tags save your life.
+
+Second item: Credentials. This is where every API key, database password, and OAuth token lives. Encrypted at rest using the encryption key we set in dot env. <break time="1s" /> Important behavior: credentials are workflow-scoped by reference. Multiple workflows can share one credential. If you rotate a Daraja Consumer Secret, you update it in one place and every workflow that uses it is updated. <break time="1s" /> Let me show you how to create one. Click new. Pick Postgres. Host: the container name "postgres". Database: n8n. User and password: whatever you set in dot env. Click test — green checkmark means it works. Save. Done.
+
+Third: Executions. This is where you spend a lot of time debugging. Every workflow run — successful, failed, in progress — logs here with the full data that flowed through every node. <break time="1s" /> When a payment fails in production, you come here, filter by workflow and status "error", click into the failed execution, and you see exactly which node broke and with what input. In a traditional backend that would be a logging pipeline you build. In n8n it's free. <break time="1s" /> One caveat for production: executions are kept forever by default. If you're processing thousands of transactions a day, add N8N_EXECUTIONS_DATA_PRUNE equals true and N8N_EXECUTIONS_DATA_MAX_AGE equals three thirty six — that's two weeks — to your dot env. We'll cover that in module seven.
+
+Fourth: Variables. These are plaintext globals — things like shortcode numbers, base URLs, reference prefixes. Anything that's not a secret but you don't want to hardcode. <break time="1s" /> Important distinction. Secrets go in Credentials. Non-secrets go in Variables. Both are referenceable from any workflow with dollar sign vars dot YOUR_NAME.
+
+Now the editor itself. Open your "hello world" workflow. Click the big plus button in the middle to add your first node.
+
+The node picker. Four categories matter for us. Triggers — these start a workflow: Webhook, Schedule, Execute Workflow Trigger. Actions — these do things: HTTP Request, Postgres, Email. Flow — logic: IF, Switch, Merge. Data transformation — Set and Code are the two you'll use most. <break time="1s" /> Search is your friend. Type "webhook" — pick the Webhook node.
+
+Webhook node properties. HTTP Method: POST, since M-Pesa callbacks are always POST. Path: whatever URL segment you want — I'll use "hello" for now. Authentication: none for this test, but you have options including header, basic, and JWT. Response Mode is interesting — "last node" means the webhook waits for your workflow to finish and returns the final output; "on received" means it returns a two hundred immediately and processes in the background. For callbacks from Safaricom, we always use "on received". We'll come back to that.
+
+Click "test workflow". n8n gives you a test URL and listens for one incoming request. In another terminal, hit it with curl.
+
+You should see the request pop into the n8n editor. Click the webhook node — you can see the body you just sent. This is the n8n debugging superpower: every node, after it runs, shows you the exact data it received. If a payment is misbehaving, this is where you investigate.
+
+Add a Set node. In the Set node, we're going to add a field called "message" with the value "hello" space, then the name from the webhook. To reference data from a previous node, we use expressions. The syntax is double curly brace, dollar sign json dot body dot name, close curly braces. <break time="1s" /> Expressions are JavaScript. Anything you can do in a JS expression, you can do here. If-else, math, string formatting, dot access, array methods. We'll use expressions constantly throughout the course.
+
+Save the workflow. Then — critical — toggle "Active" at the top-right. In test mode, the workflow only runs once per test click. In active mode, it listens forever at a production URL. For every M-Pesa workflow in this course, we toggle it active. <break time="1s" /> That's the UI tour. In the next lesson, we build our first real workflow — a webhook that returns a JSON response — and I'll teach you expressions in depth. See you there.

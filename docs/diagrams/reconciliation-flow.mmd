@@ -1,0 +1,16 @@
+flowchart TD
+    A[Every 5 min] --> B[Query pending TX<br/>age > 2 min, < 24 h]
+    B -->|rows found| C[Get auth token cached]
+    B -->|empty| Z[End]
+    C --> D[Fan out: one query per TX]
+    D --> E[POST /stkpushquery]
+    E --> F{ResultCode}
+    F -->|0| G[UPDATE status=success]
+    F -->|1032| H[UPDATE status=cancelled]
+    F -->|processing| I[Leave pending<br/>retry next cycle]
+    F -->|other| J[UPDATE status=failed]
+    G --> Z
+    H --> Z
+    I --> Z
+    J --> Z
+

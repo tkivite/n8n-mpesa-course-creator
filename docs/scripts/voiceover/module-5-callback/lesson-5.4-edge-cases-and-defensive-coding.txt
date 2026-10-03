@@ -1,0 +1,23 @@
+# Lesson 5.4 : Edge cases and defensive coding
+# Target runtime: 9 min
+# Word count: ~608
+# Paste the lines below into ElevenLabs / Murf.
+# <break time="Ns" /> tags are ElevenLabs SSML.
+
+Five edge cases that bite payment systems. We handle each one explicitly. If you ship without these, your pager will ring eventually. Let's prevent that.
+
+Edge case one: duplicate callback. We touched this already. Someone's test rig replays an old callback. Someone proxies through a buggy middleware. Doesn't matter — our idempotent UPDATE handles it. Only pending rows get updated. Resolved rows stay as-is. No double receipts.
+
+Edge case two: the callback arrives before our STK push workflow finished inserting the pending row. Rare but possible, especially under load. <break time="1s" /> Symptom: our UPDATE affects zero rows because the row doesn't exist yet. Fix: after the UPDATE, check the rows affected count. If zero, we still have the audit log row — the raw callback was inserted in step one — so recovery is possible. Add a Code node that logs a warning. The reconciliation workflow in module six will pick up the pending row later and resolve it from the audit log.
+
+Edge case three: malformed payload. Someone pokes your public callback URL with a POST body that isn't an STK callback at all. Could be a test tool. Could be a bot scanning the internet for exposed endpoints. <break time="1s" /> Our Parse Callback node already throws if Body dot stkCallback is missing. But the webhook has already returned two hundred — we don't want to return a four hundred, because that would signal Safaricom to retry if it was legit. <break time="1s" /> Better: wrap the Parse Callback in a try-catch. On error, insert into a separate "weird_calls" audit table and send a Slack alert. Don't error-propagate.
+
+Edge case four: a ResultCode we don't recognize. Safaricom adds new codes over time. If your code checks only for zero, one-oh-three-two, one-oh-three-seven, and treats anything else as success, you'll mark a mysterious new failure code as a successful payment. Then your frontend tells the customer "paid", but no money arrived. Angry customer. <break time="1s" /> Fix: build a lookup table in a Code node. Known success codes map to "success". Known failure codes map to specific statuses. Unknown codes map to "failed" and emit a Slack alert that says "unknown ResultCode seen, investigate". Fail safe.
+
+Edge case five: transaction date parsing. Safaricom sends it as a fourteen-digit NUMBER. In JavaScript, that's within safe integer range but barely. If your code does any arithmetic on it — say, converting to a Date — JS might truncate. <break time="1s" /> Fix: always treat it as a string. In our Parse Callback Code node, we do exactly that: String of meta dot TransactionDate. Then if you want a real Date, parse the string piece by piece. Our schema stores it as TEXT, not TIMESTAMP, so we never do date math on it in SQL either. Safe.
+
+Bonus edge case. You changed MPESA_CALLBACK_BASE_URL — maybe you moved domains, maybe you rotated ngrok. Old pending transactions in your database were created with the old callback URL baked into the Daraja request. The callbacks for those go to the old URL. Which doesn't exist anymore. <break time="1s" /> Fix: the reconciliation workflow we build in module six polls the status of pending transactions and resolves them even if the callback was lost. We don't need the callback to be the only source of truth. Great design — always have a reconciliation safety net.
+
+Last thing. Add an Error Trigger workflow — just one. Any time any workflow throws uncaught, fire a Slack alert with the workflow name, the error message, and the stack. One alert workflow protects everything else.
+
+Six defensive patterns in your pocket. Next lesson, we test the whole chain, callback included. See you there.

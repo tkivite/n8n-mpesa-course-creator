@@ -1,0 +1,19 @@
+# Lesson 8.5 : Use case E : WhatsApp payment chatbot
+# Target runtime: 8 min
+# Word count: ~373
+# Paste the lines below into ElevenLabs / Murf.
+# <break time="Ns" /> tags are ElevenLabs SSML.
+
+Fifth and final use case. A WhatsApp chatbot. Customers message your business number with "pay five hundred" and instantly receive an STK prompt on the same phone. No app downloads. No clicks on web pages. Just WhatsApp.
+
+Prerequisites. Meta Business account. WhatsApp Business API phone number — register through Meta's Cloud API — free for the first thousand conversations a month. Permanent access token — not the test token which expires. <break time="1s" /> In Meta's App dashboard, under WhatsApp, add a webhook. URL: your n8n webhook domain. Verify token: a shared string. Subscribe to the "messages" field. Meta will test the webhook with a GET challenge — our Webhook node handles that automatically.
+
+Workflow. WhatsApp Cloud sends a POST on every incoming message. Code node parses: check if message type is text, extract text body, match "pay" followed by a number. <break time="1s" /> If match: build STK payload with phone from msg dot from — which WhatsApp provides in two-five-four format already — and amount from the regex capture. Fire STK push. Reference WA dash timestamp. <break time="1s" /> If no match: send a WhatsApp reply "To pay, send 'pay' followed by the amount, e.g., pay 500".
+
+Expand with more commands. "Help" sends usage. "Balance" queries their open invoice from your database. "History" sends their last five payments. <break time="1s" /> Build each as a branch of an IF node — or if you have many commands, a Switch node. Keeps the workflow readable.
+
+After the STK push fires, send a WhatsApp reply: "Payment prompt sent to your phone. Enter PIN to complete". <break time="1s" /> On the callback workflow, if reference starts with WA-, send another WhatsApp reply: "Payment of KES amount received. Receipt: receipt. Thank you". <break time="1s" /> Full conversational payment flow. Zero clicks. Zero app downloads.
+
+UX tips. Reply within three seconds — WhatsApp Cloud API is fast enough that this is easy. Use emoji sparingly — too many and messages feel spammy. Confirm after actual success, not just after STK prompt sent. Users remember being promised success before paying.
+
+Module eight done. Five complete integrations, each production-grade. Pick the one closest to your business, adapt, deploy. Next up: module nine — a teaser of what's beyond STK push. See you there.

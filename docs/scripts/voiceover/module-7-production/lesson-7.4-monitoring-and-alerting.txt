@@ -1,0 +1,21 @@
+# Lesson 7.4 : Monitoring and alerting
+# Target runtime: 9 min
+# Word count: ~530
+# Paste the lines below into ElevenLabs / Murf.
+# <break time="Ns" /> tags are ElevenLabs SSML.
+
+Three questions you must be able to answer at any moment. One: is my n8n up right now? Two: are my recent transactions succeeding? Three: did Safaricom's callbacks arrive today? If any of those answers are "no", someone needs to know fast.
+
+Uptime first. UptimeRobot — free for up to fifty monitors. Add a check on your domain slash healthz — our Nginx config returns two hundred for that path. Interval five minutes. Alerts: email and SMS. <break time="1s" /> If your VPS goes down, UptimeRobot pings you within ten minutes. If your Daraja webhook returns five hundred for too long, Safaricom notices before you do. Reactive, but much better than nothing.
+
+Second: in-app errors. n8n has a special trigger called "Error Trigger". A workflow using it fires whenever any OTHER workflow fails. One Error workflow protects every other workflow in your instance. <break time="1s" /> Set it up: new workflow, add Error Trigger, add Slack node — or email node — with a message templating in the failing workflow's name, the error message, and a link back to the execution. Save, activate. Done. Any failure in STK push, callback, reconciliation, daily report — anywhere — you get a Slack notification within seconds.
+
+Third: business-level alerting. A workflow that queries the transactions table every minute. If more than five failures in the last ten minutes, Slack ops. Something is wrong with the integration — maybe your float ran out, maybe Daraja is down. <break time="1s" /> Build it just like the reconciliation workflow but with a different query. Simple threshold alert. Prevents you from discovering a four-hour outage from an angry customer tweet.
+
+Optional: a real dashboard. Install Grafana as a second container in your docker compose. Connect it to the same Postgres. Build panels: transactions per hour, success rate, average time to resolve, revenue over time. <break time="1s" /> Half a day of work. Massive impact on your ability to run the business. The handbook has a sample Grafana dashboard JSON you can import directly.
+
+Log retention. By default, n8n keeps every execution forever. On a busy integration, this fills your disk in weeks. <break time="1s" /> Add three env vars. N8N_EXECUTIONS_DATA_PRUNE equals true. MAX_AGE equals three thirty six — two weeks in hours. MAX_COUNT equals fifty thousand. n8n auto-prunes anything older. Disk stays flat. <break time="1s" /> If you want longer retention for compliance, offload executions to an external data warehouse before pruning. We don't cover that in the course, but it's a worthwhile improvement for banks and SACCOs.
+
+Backups. One cron job. Pg_dump the whole database at two AM. Upload to S3 or Backblaze B2 — Backblaze is cheaper, under a dollar a month for most businesses. Rotate: keep seven daily, four weekly, twelve monthly. <break time="1s" /> Also backup n8n_data — the folder with your workflow JSONs and credentials. Encrypted with your N8N_ENCRYPTION_KEY, so safe-ish to store off-site. <break time="1s" /> Test the restore quarterly. A backup you never tested is not a backup. Spin up a staging VPS, restore from last night's backup, verify the workflows run. Yes it takes an hour. Yes it's worth it.
+
+Observability done. One last lesson: the final checklist before switching sandbox to production. See you there.

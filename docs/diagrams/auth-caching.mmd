@@ -1,0 +1,10 @@
+flowchart TD
+    A[Workflow called] --> B{Static data has token?<br/>& expires_at > now + 60s}
+    B -->|yes| C[Return cached token]
+    B -->|no| D[Build Basic Auth header]
+    D --> E[GET /oauth/v1/generate]
+    E -->|200| F[Parse access_token<br/>+ compute expires_at]
+    F --> G[Store in static data]
+    G --> H[Return fresh token]
+    E -->|error| X[Clear cache<br/>throw error]
+

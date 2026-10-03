@@ -1,0 +1,21 @@
+# Lesson 5.3 : Sending the confirmation
+# Target runtime: 8 min
+# Word count: ~464
+# Paste the lines below into ElevenLabs / Murf.
+# <break time="Ns" /> tags are ElevenLabs SSML.
+
+We have the confirmation payload. Now, how do we deliver it? Four common options for Kenyan businesses. Email, SMS, WhatsApp, and Slack to internal ops. Let's build email first — simplest — then WhatsApp.
+
+Email first. Add the "Send Email" node. Credential: SMTP. If you use Gmail, create an app password at myaccount dot google dot com slash security. Host smtp dot gmail dot com, port five-eight-seven. SSL/TLS enabled. <break time="1s" /> From address: whatever your business email is. To address: an expression pulling from our confirmation payload. For now, you'll need the customer's email — not something Daraja gives you — so this assumes you have it from their account registration. <break time="1s" /> Subject: curly braces dollar json dot subject. Body: curly braces dollar json dot message.
+
+SMS is often more valuable than email for Kenyan customers — most people read SMS, not all read email. Africa's Talking is the local option, roughly a shilling per SMS. <break time="1s" /> There's no built-in Africa's Talking n8n node, but HTTP Request works fine. POST to api dot africastalking dot com slash restricted slash sendfromstore. Form-encoded body with "to" and "message". Header "api key" with your API key.
+
+WhatsApp is the fancy one. For transactional messages — payment confirmations — Meta requires you to use a pre-approved template. You create the template in Meta Business Suite, Meta reviews it in twenty-four hours, then you can send it to anyone. <break time="1s" /> HTTP Request node. POST to graph dot facebook dot com slash v eighteen slash your phone number ID slash messages. Bearer token in Authorization. Body is a specific JSON shape — template name, language code, and components containing your variable values. <break time="1s" /> We'll build the full template config in module eight's WhatsApp bot use case. For now, add the HTTP Request node skeleton.
+
+Fourth channel: ops notifications. Not for the customer. For your team. When a payment fails for an interesting reason — like insufficient float on your till — ops needs to know fast. <break time="1s" /> On the failure branch of our IF node, add a Slack node — or an email to ops — with the error details. Include checkout request ID, reference, phone, result code, and result desc. Ops has everything they need to investigate without logging into n8n.
+
+Let's test. Postman has the "Simulate Safaricom Callback" request. Fire it with ResultCode zero. Watch n8n executions light up. The row in Postgres flips from pending to success. The email arrives in your inbox. End to end, under two seconds.
+
+Now fire the "simulate cancelled" request. Row updates to cancelled. No customer email. Ops alert fires. Different flow, same workflow. The IF branching handled it cleanly.
+
+Confirmation done. Next lesson: the ugly cases. Partial payloads. Replay attacks. Out-of-order callbacks. See you there.

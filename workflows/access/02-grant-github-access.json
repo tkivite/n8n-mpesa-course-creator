@@ -1,0 +1,195 @@
+{
+  "name": "Access 02 : Grant GitHub Repo Access",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "course/claim-access",
+        "responseMode": "lastNode",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              { "name": "Access-Control-Allow-Origin",  "value": "*" },
+              { "name": "Access-Control-Allow-Methods", "value": "POST, OPTIONS" },
+              { "name": "Access-Control-Allow-Headers", "value": "Content-Type" }
+            ]
+          }
+        }
+      },
+      "id": "g2000000-0000-0000-0000-000000000001",
+      "name": "Claim Access Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [200, 300],
+      "webhookId": "course-claim-access"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Normalise + validate input\nconst b = $json.body || $json;\nconst receipt = String(b.receipt || '').trim();\nconst github = String(b.github || '').trim().replace(/^@/, '');\n\nif (!receipt) throw new Error('Missing receipt');\nif (!/^[a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38}$/.test(github))\n  throw new Error('Invalid GitHub username');\n\nreturn [{ json: {\n  receipt,\n  github_username: github,\n  source_ip: $json.headers?.['x-forwarded-for'] || null,\n  user_agent: $json.headers?.['user-agent'] || null\n}}];"
+      },
+      "id": "g2000000-0000-0000-0000-000000000002",
+      "name": "Validate Input",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [420, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT p.id, p.product_tier, p.buyer_email, p.refunded_at,\n       (SELECT seats_remaining FROM purchase_seat_usage WHERE purchase_id = p.id) AS seats_remaining\nFROM purchases p\nWHERE p.provider_sale_id = $1\nLIMIT 1;",
+        "options": {
+          "queryReplacement": "={{ $json.receipt }}"
+        }
+      },
+      "id": "g2000000-0000-0000-0000-000000000003",
+      "name": "Lookup Purchase",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [640, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Decide outcome\nconst input = $('Validate Input').item.json;\nconst purchase = $input.first()?.json;\n\nif (!purchase) {\n  return [{ json: {\n    allowed: false, outcome: 'invalid_receipt',\n    reason: 'No purchase found for that receipt. Double-check the sale ID from your Gumroad email.',\n    ...input\n  }}];\n}\nif (purchase.refunded_at) {\n  return [{ json: {\n    allowed: false, outcome: 'refunded',\n    reason: 'This purchase has been refunded. Access is no longer available.',\n    purchase_id: purchase.id, ...input\n  }}];\n}\nif ((purchase.seats_remaining ?? 0) <= 0) {\n  return [{ json: {\n    allowed: false, outcome: 'seats_exhausted',\n    reason: `All ${purchase.product_tier} tier seats have been granted. Contact support to transfer.`,\n    purchase_id: purchase.id, ...input\n  }}];\n}\n\nreturn [{ json: {\n  allowed: true, outcome: 'granted',\n  purchase_id: purchase.id,\n  product_tier: purchase.product_tier,\n  buyer_email: purchase.buyer_email,\n  ...input\n}}];"
+      },
+      "id": "g2000000-0000-0000-0000-000000000004",
+      "name": "Decide Outcome",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [860, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "typeValidation": "strict" },
+          "combinator": "and",
+          "conditions": [
+            {
+              "leftValue": "={{ $json.allowed }}",
+              "rightValue": true,
+              "operator": { "type": "boolean", "operation": "equals" }
+            }
+          ]
+        }
+      },
+      "id": "g2000000-0000-0000-0000-000000000005",
+      "name": "Allowed?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1080, 300]
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://api.github.com/repos/{{ $env.GH_REPO_OWNER }}/{{ $env.GH_REPO_NAME }}/collaborators/{{ $json.github_username }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $env.GH_ADMIN_TOKEN }}" },
+            { "name": "Accept",        "value": "application/vnd.github+json" },
+            { "name": "X-GitHub-Api-Version", "value": "2022-11-28" },
+            { "name": "User-Agent",    "value": "n8n-mpesa-course-access-bot" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"permission\": \"pull\" }",
+        "options": {
+          "timeout": 15000,
+          "response": { "response": { "fullResponse": true } }
+        }
+      },
+      "id": "g2000000-0000-0000-0000-000000000006",
+      "name": "GitHub: Invite Collaborator",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1300, 220]
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "schema": { "__rl": true, "value": "public", "mode": "list" },
+        "table": { "__rl": true, "value": "access_grants", "mode": "list" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "purchase_id": "={{ $('Decide Outcome').item.json.purchase_id }}",
+            "github_username": "={{ $('Decide Outcome').item.json.github_username }}",
+            "github_invite_id": "={{ $json.body?.id || null }}"
+          }
+        },
+        "options": { "skipOnConflict": true }
+      },
+      "id": "g2000000-0000-0000-0000-000000000007",
+      "name": "Record Grant",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [1520, 220]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Build response + audit\nconst d = $('Decide Outcome').item.json;\nreturn [{ json: {\n  success: true,\n  message: `Invitation sent to @${d.github_username}. Check your GitHub notifications (and email) to accept — it expires in 7 days.`,\n  tier: d.product_tier,\n  repo: `${$env.GH_REPO_OWNER}/${$env.GH_REPO_NAME}`\n}}];"
+      },
+      "id": "g2000000-0000-0000-0000-000000000008",
+      "name": "Build Success Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1740, 220]
+    },
+    {
+      "parameters": {
+        "jsCode": "const d = $('Decide Outcome').item.json;\nreturn [{ json: {\n  success: false,\n  outcome: d.outcome,\n  message: d.reason\n}}];"
+      },
+      "id": "g2000000-0000-0000-0000-000000000009",
+      "name": "Build Failure Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1300, 420]
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "schema": { "__rl": true, "value": "public", "mode": "list" },
+        "table": { "__rl": true, "value": "access_attempts", "mode": "list" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "submitted_receipt": "={{ $('Validate Input').item.json.receipt }}",
+            "submitted_github":  "={{ $('Validate Input').item.json.github_username }}",
+            "source_ip":         "={{ $('Validate Input').item.json.source_ip }}",
+            "user_agent":        "={{ $('Validate Input').item.json.user_agent }}",
+            "outcome":           "={{ $('Decide Outcome').item.json.outcome }}",
+            "reason":            "={{ $('Decide Outcome').item.json.reason || null }}"
+          }
+        }
+      },
+      "id": "g2000000-0000-0000-0000-00000000000a",
+      "name": "Audit Log",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [1520, 420]
+    }
+  ],
+  "connections": {
+    "Claim Access Webhook":  { "main": [[{ "node": "Validate Input", "type": "main", "index": 0 }]] },
+    "Validate Input":        { "main": [[{ "node": "Lookup Purchase", "type": "main", "index": 0 }]] },
+    "Lookup Purchase":       { "main": [[{ "node": "Decide Outcome", "type": "main", "index": 0 }]] },
+    "Decide Outcome":        { "main": [[{ "node": "Allowed?", "type": "main", "index": 0 }]] },
+    "Allowed?": {
+      "main": [
+        [{ "node": "GitHub: Invite Collaborator", "type": "main", "index": 0 }],
+        [{ "node": "Build Failure Response", "type": "main", "index": 0 }]
+      ]
+    },
+    "GitHub: Invite Collaborator": { "main": [[{ "node": "Record Grant", "type": "main", "index": 0 }]] },
+    "Record Grant":                { "main": [[{ "node": "Build Success Response", "type": "main", "index": 0 }]] },
+    "Build Success Response":      { "main": [[{ "node": "Audit Log", "type": "main", "index": 0 }]] },
+    "Build Failure Response":      { "main": [[{ "node": "Audit Log", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "pinData": {},
+  "meta": {
+    "description": "Buyer submits { receipt, github }. Verifies in DB, invites to repo via GitHub API, records the grant, audits every attempt."
+  },
+  "tags": [{ "name": "access" }, { "name": "course" }]
+}
+

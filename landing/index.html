@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>n8n M-Pesa Mastery · Build STK Push Payment Workflows (No Code)</title>
+  <meta name="description" content="Ship a production-ready M-Pesa STK Push integration in under 2 hours with n8n. No backend code. Full source, workflows, Postman collection, handbook and VPS deploy script included." />
+  <meta property="og:title" content="n8n M-Pesa Mastery" />
+  <meta property="og:description" content="Build STK Push payment workflows without writing a backend. For Kenyan devs, founders, and no-code builders." />
+  <meta property="og:type" content="website" />
+  <style>
+    :root {
+      --bg: #0f1115;
+      --panel: #171a21;
+      --fg: #e9edf3;
+      --muted: #9aa3b2;
+      --accent: #2fbf71;
+      --accent-dark: #1f8a4e;
+      --border: #262a33;
+      --radius: 14px;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: var(--bg); color: var(--fg); font-family: -apple-system, "Segoe UI", "Inter", "Helvetica Neue", Arial, sans-serif; line-height: 1.6; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+    header { padding: 20px 0; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: rgba(15,17,21,.9); backdrop-filter: blur(8px); z-index: 10; }
+    header .wrap { display: flex; align-items: center; justify-content: space-between; }
+    .brand { font-weight: 800; font-size: 18px; letter-spacing: -.01em; }
+    .brand span { color: var(--accent); }
+    nav a { color: var(--muted); margin-left: 24px; font-size: 14px; }
+    nav a:hover { color: var(--fg); text-decoration: none; }
+
+    /* Hero */
+    .hero { padding: 96px 0 72px; text-align: center; }
+    .hero .eyebrow { color: var(--accent); font-weight: 600; font-size: 14px; letter-spacing: .12em; text-transform: uppercase; }
+    .hero h1 { font-size: clamp(36px, 6vw, 64px); line-height: 1.08; margin: 16px 0 20px; font-weight: 800; letter-spacing: -.02em; }
+    .hero h1 em { font-style: normal; background: linear-gradient(100deg, var(--accent), #7ad9a7); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .hero p.lede { font-size: 20px; color: var(--muted); max-width: 720px; margin: 0 auto 36px; }
+    .cta-row { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+    .btn { display: inline-block; padding: 14px 24px; border-radius: 10px; font-weight: 600; font-size: 16px; border: 1px solid transparent; transition: transform .1s, background .2s; }
+    .btn:hover { transform: translateY(-1px); text-decoration: none; }
+    .btn-primary { background: var(--accent); color: #0b1a12; }
+    .btn-primary:hover { background: #40cc81; }
+    .btn-ghost { background: transparent; color: var(--fg); border-color: var(--border); }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+    .hero .proof { color: var(--muted); font-size: 13px; margin-top: 32px; }
+
+    /* Sections */
+    section { padding: 72px 0; }
+    section h2 { font-size: clamp(28px, 3.5vw, 38px); margin: 0 0 12px; letter-spacing: -.01em; }
+    section .lede { color: var(--muted); font-size: 17px; margin: 0 0 44px; max-width: 640px; }
+
+    /* What you'll build */
+    .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
+    .card { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; }
+    .card h3 { margin: 0 0 10px; font-size: 18px; color: var(--fg); }
+    .card p { margin: 0; color: var(--muted); font-size: 15px; }
+    .card .icon { width: 36px; height: 36px; background: var(--accent); color: #0b1a12; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; margin-bottom: 14px; }
+
+    /* Curriculum */
+    .modules { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; }
+    .mod { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 22px; display: flex; gap: 16px; align-items: flex-start; }
+    .mod .num { min-width: 44px; height: 44px; border-radius: 10px; background: #0f3321; color: var(--accent); font-weight: 800; display: inline-flex; align-items: center; justify-content: center; font-size: 18px; }
+    .mod h4 { margin: 0 0 4px; font-size: 15px; }
+    .mod span { color: var(--muted); font-size: 13px; }
+
+    /* Deliverables */
+    ul.delivs { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
+    ul.delivs li { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 14px 18px; display: flex; align-items: center; gap: 12px; font-size: 15px; }
+    ul.delivs li::before { content: "✓"; color: var(--accent); font-weight: 800; }
+
+    /* Pricing */
+    .pricing { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+    .tier { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px; display: flex; flex-direction: column; }
+    .tier.popular { border-color: var(--accent); position: relative; }
+    .tier.popular::after { content: "Most popular"; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--accent); color: #0b1a12; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 999px; letter-spacing: .05em; text-transform: uppercase; }
+    .tier h3 { margin: 0 0 6px; }
+    .tier .price { font-size: 36px; font-weight: 800; margin: 10px 0 4px; letter-spacing: -.01em; }
+    .tier .price small { font-size: 14px; color: var(--muted); font-weight: 500; }
+    .tier .kes { color: var(--muted); font-size: 14px; margin-bottom: 18px; }
+    .tier ul { padding-left: 18px; margin: 0 0 24px; color: var(--muted); }
+    .tier ul li { margin-bottom: 6px; }
+    .tier .btn { margin-top: auto; text-align: center; }
+
+    /* FAQ */
+    .faq details { border: 1px solid var(--border); border-radius: 10px; padding: 16px 20px; margin-bottom: 10px; background: var(--panel); }
+    .faq summary { cursor: pointer; font-weight: 600; font-size: 16px; list-style: none; }
+    .faq summary::marker { display: none; }
+    .faq summary::-webkit-details-marker { display: none; }
+    .faq summary::after { content: "+"; float: right; color: var(--accent); font-size: 20px; font-weight: 800; }
+    .faq details[open] summary::after { content: "–"; }
+    .faq details p { color: var(--muted); margin: 12px 0 0; }
+
+    /* Footer */
+    footer { border-top: 1px solid var(--border); padding: 40px 0; color: var(--muted); font-size: 14px; }
+    footer .wrap { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+
+    @media (max-width: 640px) {
+      nav { display: none; }
+      .hero { padding: 60px 0 48px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="brand">n8n M-Pesa <span>Mastery</span></div>
+    <nav>
+      <a href="#curriculum">Curriculum</a>
+      <a href="#deliverables">Deliverables</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#faq">FAQ</a>
+      <a href="https://github.com/tkivite/n8n-mpesa-course">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <div class="eyebrow">For Kenyan devs, founders & agencies</div>
+    <h1>Build M-Pesa STK Push payments<br/><em>without a backend.</em></h1>
+    <p class="lede">
+      Ship a production-ready integration — OAuth, callbacks, reconciliation, the whole thing —
+      in under two hours. Four visual workflows replace three hundred lines of Java.
+    </p>
+    <div class="cta-row">
+      <a href="#pricing" class="btn btn-primary">Enroll · from $29</a>
+      <a href="https://github.com/tkivite/n8n-mpesa-course" class="btn btn-ghost">Browse the Git repo →</a>
+    </div>
+    <div class="proof">10 modules · 6.5 hours of lessons · Postman collection, SQL schemas, VPS deploy script, PDF handbook</div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>What you ship by the end</h2>
+    <p class="lede">Not a demo. A real, deployed STK Push integration your clients can use the next day.</p>
+    <div class="grid-3">
+      <div class="card">
+        <div class="icon">1</div>
+        <h3>4 production workflows</h3>
+        <p>OAuth with caching, STK Push with validation, callback handler, reconciliation. All import-ready JSON.</p>
+      </div>
+      <div class="card">
+        <div class="icon">2</div>
+        <h3>5 use-case templates</h3>
+        <p>WooCommerce checkout, SaaS billing, school fees portal, donation page, WhatsApp chatbot. Drop in, adapt, ship.</p>
+      </div>
+      <div class="card">
+        <div class="icon">3</div>
+        <h3>Live on a VPS</h3>
+        <p>One-command deploy script provisions Nginx, HTTPS, firewall, systemd. Hetzner-ready in under five minutes.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="curriculum" style="background: #0b0d12;">
+  <div class="wrap">
+    <h2>Curriculum</h2>
+    <p class="lede">Ten modules, roughly six and a half hours of lessons. Each module has a working artifact you can commit to Git.</p>
+    <div class="modules">
+      <div class="mod"><div class="num">0</div><div><h4>Welcome & Setup</h4><span>Docker Compose · 15 min</span></div></div>
+      <div class="mod"><div class="num">1</div><div><h4>Introduction to n8n</h4><span>UI, nodes, expressions · 45 min</span></div></div>
+      <div class="mod"><div class="num">2</div><div><h4>Understanding Daraja</h4><span>Shortcode, passkey, callbacks · 40 min</span></div></div>
+      <div class="mod"><div class="num">3</div><div><h4>OAuth in n8n</h4><span>Token caching, sub-workflows · 25 min</span></div></div>
+      <div class="mod"><div class="num">4</div><div><h4>Building STK Push ⭐</h4><span>Validation → DB persistence · 60 min</span></div></div>
+      <div class="mod"><div class="num">5</div><div><h4>Handling the Callback</h4><span>Idempotency, edge cases · 45 min</span></div></div>
+      <div class="mod"><div class="num">6</div><div><h4>Reconciliation</h4><span>Polling, daily reports · 30 min</span></div></div>
+      <div class="mod"><div class="num">7</div><div><h4>Production Hardening</h4><span>VPS, HTTPS, monitoring · 40 min</span></div></div>
+      <div class="mod"><div class="num">8</div><div><h4>Real-World Use Cases</h4><span>Five end-to-end builds · 45 min</span></div></div>
+      <div class="mod"><div class="num">9</div><div><h4>Beyond STK Push</h4><span>B2C, C2B, reversals · 30 min</span></div></div>
+      <div class="mod"><div class="num">10</div><div><h4>Selling Your Skill</h4><span>Packaging, pricing · 20 min</span></div></div>
+    </div>
+  </div>
+</section>
+
+<section id="deliverables">
+  <div class="wrap">
+    <h2>Everything you take home</h2>
+    <p class="lede">Everything on this list is in the Git repo. Yours forever.</p>
+    <ul class="delivs">
+      <li>Video lessons (MP4, 1080p)</li>
+      <li>Course handbook (PDF, 100+ pages)</li>
+      <li>Daraja API cheat sheet (PDF)</li>
+      <li>Go-live checklist (PDF)</li>
+      <li>4 core workflows (JSON)</li>
+      <li>5 use-case workflows (JSON)</li>
+      <li>Postman collection (Daraja + n8n)</li>
+      <li>Postgres schema (SQL)</li>
+      <li>Supabase migration (SQL)</li>
+      <li>Docker Compose starter</li>
+      <li>VPS one-command deploy script</li>
+      <li>Nginx & systemd configs</li>
+      <li>Mermaid architecture diagrams</li>
+      <li>Discord / Telegram community</li>
+      <li>Certificate of completion</li>
+    </ul>
+  </div>
+</section>
+
+<section id="pricing" style="background: #0b0d12;">
+  <div class="wrap">
+    <h2>Pick your tier</h2>
+    <p class="lede">All tiers include lifetime access to the Git repo and future updates.</p>
+    <div class="pricing">
+      <div class="tier">
+        <h3>Starter</h3>
+        <div class="price">$29<small> once</small></div>
+        <div class="kes">≈ 3,900 KES</div>
+        <ul>
+          <li>All 10 modules of video</li>
+          <li>PDF handbook</li>
+          <li>Daraja cheat sheet</li>
+          <li>Community access</li>
+        </ul>
+        <a href="#" class="btn btn-ghost">Buy Starter</a>
+      </div>
+      <div class="tier popular">
+        <h3>Pro</h3>
+        <div class="price">$79<small> once</small></div>
+        <div class="kes">≈ 10,500 KES</div>
+        <ul>
+          <li>Everything in Starter</li>
+          <li>Git repo (workflows, Postman, SQL)</li>
+          <li>Deploy script & Nginx config</li>
+          <li>Notion workspace template</li>
+          <li>All five use-case workflows</li>
+        </ul>
+        <a href="#" class="btn btn-primary">Buy Pro</a>
+      </div>
+      <div class="tier">
+        <h3>Agency</h3>
+        <div class="price">$199<small> once</small></div>
+        <div class="kes">≈ 26,500 KES</div>
+        <ul>
+          <li>Everything in Pro</li>
+          <li>1-hour private consult</li>
+          <li>White-label delivery kit</li>
+          <li>Production go-live checklist</li>
+          <li>Pricing & proposal templates</li>
+        </ul>
+        <a href="#" class="btn btn-ghost">Buy Agency</a>
+      </div>
+    </div>
+    <p style="color: var(--muted); font-size: 13px; text-align: center; margin-top: 24px;">
+      Prices in USD. Pay with M-Pesa, card, or crypto. Thirty-day refund if the course doesn't ship you a working integration.
+    </p>
+  </div>
+</section>
+
+<section id="faq">
+  <div class="wrap">
+    <h2>Common questions</h2>
+    <div class="faq" style="max-width: 760px;">
+      <details>
+        <summary>Do I need to know JavaScript?</summary>
+        <p>Enough to read and copy. The course uses JavaScript inside n8n Code nodes for timestamp and password computation, but the lessons explain every line. If you can read a `for` loop and template strings, you're ready.</p>
+      </details>
+      <details>
+        <summary>Do I need a Safaricom business account?</summary>
+        <p>No — not for the course. The sandbox is free and lets you build the entire integration without any paperwork. You only need a business account when you're ready to accept real payments, which is covered in Module 7.</p>
+      </details>
+      <details>
+        <summary>Does it work outside Kenya?</summary>
+        <p>The STK Push flow is Kenya-specific, but n8n and the general payment patterns apply to Airtel Money, MTN MoMo, and other African payment APIs. Module 9 covers the broader landscape.</p>
+      </details>
+      <details>
+        <summary>What if Safaricom changes the API?</summary>
+        <p>Course updates are included for life. When Daraja changes something non-trivial, the workflows get patched in the repo and course videos get updated. GitHub notifies you on commits.</p>
+      </details>
+      <details>
+        <summary>Can I use what I build commercially?</summary>
+        <p>Yes. The code and workflow JSONs are MIT-licensed. Use them in your products, in client work, or resell your implementations. The video content and PDFs are for personal use only.</p>
+      </details>
+      <details>
+        <summary>How long does the whole thing take?</summary>
+        <p>Six to eight focused hours. A productive weekend. Most students report a working sandbox integration by hour three.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div>© 2026 · n8n M-Pesa Mastery · <a href="https://github.com/tkivite/n8n-mpesa-course">GitHub</a> · <a href="https://developer.safaricom.co.ke" rel="nofollow">Daraja</a></div>
+    <div>Not affiliated with Safaricom PLC. M-Pesa is a trademark of Safaricom PLC.</div>
+  </div>
+</footer>
+
+</body>
+</html>
+

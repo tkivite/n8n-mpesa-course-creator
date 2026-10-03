@@ -1,0 +1,25 @@
+# Lesson 6.2 : Building the reconciliation workflow
+# Target runtime: 10 min
+# Word count: ~581
+# Paste the lines below into ElevenLabs / Murf.
+# <break time="Ns" /> tags are ElevenLabs SSML.
+
+Import zero-four dash reconciliation dot json. Six nodes. Quick walkthrough.
+
+Node one: Schedule Trigger. Interval: every five minutes. Why five? Fast enough to catch missed callbacks quickly, slow enough to avoid rate limiting. If your business is high-volume, you could tune this down to one minute. If low-volume, every ten minutes is fine.
+
+Node two: find pending transactions. SELECT where status is pending, created at least two minutes ago, created at most twenty-four hours ago. Limit fifty. <break time="1s" /> The two-minute floor matters. If a transaction was created thirty seconds ago, give the callback a chance to arrive before you query. Querying too fast wastes Daraja calls and risks a race with the incoming callback. <break time="1s" /> The twenty-four-hour ceiling matters because stkpushquery only works for ~two hours. Anything older is unrecoverable by this workflow — we'll handle those separately with a manual review process. <break time="1s" /> Limit fifty prevents us from drowning Daraja with a massive backlog on first-run after an outage.
+
+Node three: Execute Workflow — our auth sub-workflow. One token per batch of fifty. Cached. Fast.
+
+Node four: Code node that fans out. Takes the single token and the array of pending rows, computes one timestamp and one password — reused across all queries in this batch — and returns an array of items. One item per pending transaction. <break time="1s" /> Remember from module one: n8n runs the next node once per item. So this one Code node returns fifty items, and the next node — the HTTP Request — fires fifty parallel queries.
+
+Node five: HTTP Request. POST to the url, authHeader as Authorization, body is the payload stringified. Same pattern as the STK push HTTP node. <break time="1s" /> Here's the magic: because the previous node emitted an array of items, this node runs once per item in parallel. All fifty queries fire more or less simultaneously. Daraja usually handles the burst fine. <break time="1s" /> If you want to rate-limit, add a "Loop Over Items" node or a Wait between queries. For most businesses this isn't necessary.
+
+Node six: Postgres update. SQL has a CASE expression that maps ResultCode to our status enum. Zero becomes success. One-oh-three-two becomes cancelled. Null — meaning we got an error from Daraja, not a resolved status — leaves the row unchanged. Anything else becomes failed. <break time="1s" /> The "null leaves unchanged" branch is important. If Daraja returned "transaction being processed", we don't want to mark the row as failed — we want to let the next poll five minutes later try again. So the Build Query Payloads Code node should also normalize that case: if the response from Daraja is a "still processing" state, output a null-ish ResultCode so the UPDATE skips.
+
+Save, activate. First run fires five minutes from now. Or click "Execute Workflow" to force-run immediately. Observe: find pending TX returns however many pending rows exist. Updates batch-apply. Rows flip from pending to success or cancelled.
+
+Important: this workflow and the callback workflow can race each other. Imagine a callback arrives at exactly the same moment as a reconciliation query resolves. <break time="1s" /> Both update the row to the same status. Idempotent. No harm done. The customer may get two confirmations if we're not careful. Fix: add "AND status equals pending" to the UPDATE in both workflows — the second one to arrive sees status is no longer pending and no-ops.
+
+Core polling done. Next lesson, we add a daily report that keeps finance happy. See you there.

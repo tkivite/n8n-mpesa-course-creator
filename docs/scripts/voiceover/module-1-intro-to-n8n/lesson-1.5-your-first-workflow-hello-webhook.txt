@@ -1,0 +1,29 @@
+# Lesson 1.5 : Your first workflow (Hello Webhook)
+# Target runtime: 7 min
+# Word count: ~517
+# Paste the lines below into ElevenLabs / Murf.
+# <break time="Ns" /> tags are ElevenLabs SSML.
+
+We're going to build a tiny but real workflow in this lesson. It accepts a POST request with a phone number, validates it, and returns either a success response or an error. By the end, you'll understand triggers, expressions, code nodes, and conditional logic — which is literally every pattern we'll use for M-Pesa.
+
+New workflow. Add a Webhook node. Path: validate-phone. Method: POST. Response mode: last node — meaning whatever the final node outputs, that's what the caller receives.
+
+Add a Code node after it. Code nodes are where n8n becomes a real programming environment. You get a full JavaScript runtime, access to Node's built-in modules, and the input from previous nodes as a variable called "items" or using the shorthand "$input". <break time="1s" /> Paste this. Grab the phone number from the request body. Strip everything that isn't a digit. If it starts with zero, replace the zero with two-five-four. If it starts with plus, drop the plus. If it just starts with seven or one, prepend two-five-four.
+
+Return format. n8n expects an array of objects, each with a "json" key. This is because n8n is built around the concept of items — a single workflow run can process multiple items in parallel. We're returning one item, but it still has to be wrapped in an array.
+
+Add an IF node. The IF node has two outputs: true branch on top, false branch on bottom. We're going to route valid phones one way and invalid phones the other. <break time="1s" /> Condition: value one is the "valid" field from the Code node — expression: curly braces dollar json dot valid. Operation: equals. Value two: boolean true. Save.
+
+On the true branch, add a Set node. Fields: "status" equals "ok", "phone" equals the normalised phone from the Code node, "message" equals "phone number is valid". Mode: "keep only set" — meaning throw away everything else from previous nodes, only output what I define here. <break time="1s" /> On the false branch, another Set node. "Status" equals "error". "Reason" equals "invalid phone format". "Expected" equals the string "two five four seven X X X X X X X X X". <break time="1s" /> This is the pattern you'll use for every M-Pesa validation. Normalise. Branch. Respond.
+
+Save. Activate. Open a terminal and let's hit it.
+
+Zero-seven-one-two-three-four-five-six-seven-eight. That's a Kenyan Safaricom number in local format. Should come back as valid.
+
+There we go. Normalised to the two-five-four format, flagged as valid. Now let's break it on purpose.
+
+A US-format number. Should come back as invalid.
+
+Perfect. Status error, reason invalid phone format, expected the two-five-four prefix. <break time="1s" /> Congratulations. You just built a working validation API without writing a line of backend code. No Express. No routes file. No deployment. The exact same pattern — webhook, validate, branch, respond — is what we'll use for the STK push workflow in module four. Only the business logic will change.
+
+In the next lesson, we go deeper on expressions, how items work, and how to persist data across executions with static data. That's the last concept before we hit Daraja. Let's keep moving.

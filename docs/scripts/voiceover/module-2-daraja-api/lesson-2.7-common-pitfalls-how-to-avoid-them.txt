@@ -1,0 +1,21 @@
+# Lesson 2.7 : Common pitfalls & how to avoid them
+# Target runtime: 5 min
+# Word count: ~567
+# Paste the lines below into ElevenLabs / Murf.
+# <break time="Ns" /> tags are ElevenLabs SSML.
+
+Last lesson of module two. These are the pitfalls that have cost me weekends. If I'd watched this video four years ago I'd have shipped integrations twice as fast. Let's save you the pain.
+
+Pitfall one: clock drift. Your VPS is off by six minutes. Every password you generate is based on a timestamp Daraja considers invalid. Every single STK push fails with a cryptic error, usually something like "invalid access token" even though the token is fine. <break time="1s" /> Fix: on Ubuntu, "sudo timedatectl set-ntp true". That's it. Permanent fix. On Docker Compose, make sure you set the timezone env var — we do that in our compose file.
+
+Pitfall two: wrong base URL. You go to production. You switch Consumer Key and Secret. You forget to switch the base URL. Now you're sending production credentials to the sandbox endpoint. The sandbox returns a token because it looks valid, but no actual money moves. You think your integration is live. It's not. <break time="1s" /> Fix: in our dot env, MPESA_BASE_URL and MPESA_ENV are separate variables. In module seven, we add a startup check that logs the environment loudly. "Running in SANDBOX" or "Running in PRODUCTION" in giant letters. If you ever see "SANDBOX" when you expected production, you catch it immediately.
+
+Pitfall three: localhost callback URL. In sandbox, you set CallBackURL to localhost five-six-seven-eight. Daraja returns success. You expect the callback to arrive. It never does. Because Daraja's servers in some data center cannot reach your laptop on localhost. <break time="1s" /> Fix for local dev: ngrok. The docker compose profile called "tunnel" starts ngrok automatically. Your webhook becomes publicly reachable at a dot ngrok-free dot app URL. We'll do this together in module five. <break time="1s" /> Fix for production: a real domain pointing to your VPS with HTTPS. Our vps-setup script handles cert issuance via Let's Encrypt.
+
+Pitfall four: slow callback endpoint. Your callback does a database write, then calls a WhatsApp API to send a confirmation, then renders a PDF receipt. Total time: thirty-two seconds. Safaricom times out at thirty. They mark your endpoint unhealthy. Future callbacks start getting delayed. <break time="1s" /> Fix: return two hundred immediately, do everything else asynchronously. In n8n, that's Response Mode: on received. The webhook returns two hundred the moment the request arrives — regardless of whether downstream nodes have run.
+
+Pitfall five: trailing whitespace. You copy Consumer Secret from the Daraja portal and paste it into dot env. The portal added an invisible newline at the end. Every OAuth attempt returns "invalid credentials". You spend two hours convinced your credentials are revoked. <break time="1s" /> Fix: when editing dot env, double-click to select the value — never triple-click or shift-end which grab the newline. If in doubt, use "echo dash n your value pipe xxd" to inspect for stray bytes.
+
+Pitfall six: phone format. You pass phone as zero-seven-one-two. Daraja returns "invalid party A". Must be two-five-four with no plus and no leading zero. <break time="1s" /> Fix: we normalize in our validation Code node — the same code we built in lesson one-five. Zero prefix becomes two-five-four. Plus prefix dropped. Just-seven-prefix gets two-five-four prepended.
+
+Module two complete. You now understand Daraja better than most people who've been integrating with it for years. In module three, we leave theory and build our first n8n workflow: the OAuth sub-workflow that every other workflow in this course will call. See you there.

@@ -1,0 +1,84 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: n8n-mpesa-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-n8n}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-n8n}
+      POSTGRES_DB: ${POSTGRES_DB:-n8n}
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+      - ../db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ../db/access.sql:/docker-entrypoint-initdb.d/02-access.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-n8n}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: n8n-mpesa
+    restart: unless-stopped
+    ports:
+      - "5678:5678"
+    environment:
+      # --- Core ---
+      N8N_HOST: ${N8N_HOST:-localhost}
+      N8N_PORT: 5678
+      N8N_PROTOCOL: ${N8N_PROTOCOL:-http}
+      WEBHOOK_URL: ${WEBHOOK_URL:-http://localhost:5678/}
+      GENERIC_TIMEZONE: Africa/Nairobi
+      TZ: Africa/Nairobi
+
+      # --- Database ---
+      DB_TYPE: postgresdb
+      DB_POSTGRESDB_HOST: postgres
+      DB_POSTGRESDB_PORT: 5432
+      DB_POSTGRESDB_DATABASE: ${POSTGRES_DB:-n8n}
+      DB_POSTGRESDB_USER: ${POSTGRES_USER:-n8n}
+      DB_POSTGRESDB_PASSWORD: ${POSTGRES_PASSWORD:-n8n}
+
+      # --- Security ---
+      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY:-change-me-to-a-random-32-char-string}
+      N8N_BASIC_AUTH_ACTIVE: "true"
+      N8N_BASIC_AUTH_USER: ${N8N_BASIC_AUTH_USER:-admin}
+      N8N_BASIC_AUTH_PASSWORD: ${N8N_BASIC_AUTH_PASSWORD:-admin}
+
+      # --- M-Pesa (injected into workflows via $env) ---
+      MPESA_ENV: ${MPESA_ENV:-sandbox}
+      MPESA_CONSUMER_KEY: ${MPESA_CONSUMER_KEY}
+      MPESA_CONSUMER_SECRET: ${MPESA_CONSUMER_SECRET}
+      MPESA_SHORTCODE: ${MPESA_SHORTCODE:-174379}
+      MPESA_PASSKEY: ${MPESA_PASSKEY}
+      MPESA_CALLBACK_BASE_URL: ${MPESA_CALLBACK_BASE_URL}
+      MPESA_BASE_URL: ${MPESA_BASE_URL:-https://sandbox.safaricom.co.ke}
+
+      # --- Course access control ---
+      GH_REPO_OWNER: ${GH_REPO_OWNER}
+      GH_REPO_NAME: ${GH_REPO_NAME}
+      GH_ADMIN_TOKEN: ${GH_ADMIN_TOKEN}
+      GUMROAD_WEBHOOK_SECRET: ${GUMROAD_WEBHOOK_SECRET}
+      COURSE_SITE_URL: ${COURSE_SITE_URL:-https://yourcourse.co.ke}
+      COURSE_FROM_EMAIL: ${COURSE_FROM_EMAIL}
+    volumes:
+      - ./n8n_data:/home/node/.n8n
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  ngrok:
+    image: ngrok/ngrok:latest
+    container_name: n8n-mpesa-ngrok
+    restart: unless-stopped
+    command: ["http", "n8n:5678", "--log=stdout"]
+    environment:
+      NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN}
+    ports:
+      - "4040:4040"  # ngrok inspector UI
+    depends_on:
+      - n8n
+    profiles:
+      - tunnel  # only starts when: docker compose --profile tunnel up
+

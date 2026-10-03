@@ -1,0 +1,21 @@
+# Lesson 2.2 : Creating a Safaricom developer account
+# Target runtime: 5 min
+# Word count: ~371
+# Paste the lines below into ElevenLabs / Murf.
+# <break time="Ns" /> tags are ElevenLabs SSML.
+
+Head to developer dot safaricom dot co dot ke. Top right, click sign up. If you've ever signed up for a developer portal, this will feel familiar — email, phone, password. Use your real phone number: Safaricom sometimes sends OTP verifications.
+
+Fill it out. Verify your email. Log in. You're now in the Daraja developer dashboard. <break time="1s" /> A note: this is a free, self-service portal. You do not need to be a registered business to use the sandbox. Any individual can sign up and start building. You only need business paperwork when you go to production.
+
+Tour. Left sidebar. "My apps" is where your credentials live. "Documentation" is Safaricom's reference — bookmark it, but honestly, the docs are inconsistent, so lean on the course handbook. "APIs" lists everything available. "Test credentials" is the shortcut to sandbox details. <break time="1s" /> Click "my apps", then "add a new app". This is where you create your first app.
+
+App name: anything, I'm calling mine "n8n-mpesa-course". Products: tick Lipa Na M-Pesa Sandbox, M-Pesa Sandbox, and Daraja APIs. Create.
+
+You now have a Consumer Key and a Consumer Secret. These are the OAuth credentials we use to get Bearer tokens. Treat them like passwords — never commit them to Git. If they ever leak, come back here and regenerate them. <break time="1s" /> Copy them. Open the dot env file in the course repo. Paste Consumer Key into MPESA_CONSUMER_KEY and Consumer Secret into MPESA_CONSUMER_SECRET. Save.
+
+Important: after editing dot env, you need to restart n8n so it picks up the new environment variables. In the docker folder, run docker compose down, then docker compose up dash d. Thirty seconds, you're back.
+
+Let's verify the credentials work. In the scripts folder of the repo, there's test dash token dot sh. Run it. It uses curl to hit the OAuth endpoint and prints the token. If you see an access underscore token in the output, you're wired up correctly. If you see "invalid credentials", double-check your copy-paste. Trailing newlines are the usual culprit.
+
+You have credentials. Next lesson, we talk about the other three things you need to make an STK push — shortcode, passkey, and the password formula. These confuse most newcomers. We'll make them simple.

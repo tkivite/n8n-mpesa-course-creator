@@ -1,0 +1,19 @@
+# Lesson 10.1 : Packaging your service
+# Target runtime: 7 min
+# Word count: ~367
+# Paste the lines below into ElevenLabs / Murf.
+# <break time="Ns" /> tags are ElevenLabs SSML.
+
+Welcome to module ten. The agency tier module. If you plan to sell M-Pesa integration services to Kenyan businesses, this module shows you how to package, price, and deliver repeatably. No consulting fluff — numbers and templates.
+
+Three tiers. Starter, Standard, Premium. Prices for Kenyan businesses. Twenty-five thousand, seventy-five thousand, two hundred thousand shillings respectively. <break time="1s" /> Three tiers because of the "goldilocks" effect. Most buyers pick middle. If you offer only one price, people negotiate. If you offer three, most say "I'll take the standard".
+
+Starter: twenty-five thousand. Covers everything you learned in modules one through five. Install n8n on their VPS. Deploy the four workflows. Wire production credentials. Hand over a one-page runbook. Seven-day warranty. <break time="1s" /> Target customer: a founder with a technical team who can take it from here. You're basically selling them the fast start. <break time="1s" /> Your effort: six to eight hours. Hourly rate implied: three thousand plus.
+
+Standard: seventy-five thousand. Add module six's reconciliation workflow. Add one business-logic integration — Google Sheets logging, WhatsApp confirmations, Woo plugin. Daily reports to finance. Thirty-day warranty. <break time="1s" /> Target: a growing business with real volume. They want a system they can trust to run without them. <break time="1s" /> Your effort: twenty to twenty-five hours. Hourly: three thousand.
+
+Premium: two hundred thousand. Full managed experience. Everything above plus an admin dashboard, Grafana for ops, two hours of developer training for their team, and three months of included support. Ninety-day warranty. <break time="1s" /> Target: SACCO, mid-size SaaS, school chain. Businesses that need the system to be a core infrastructure component. <break time="1s" /> Your effort: forty to fifty hours spread over a month. Hourly: four thousand plus.
+
+Add-ons. Monthly managed support — fifteen thousand a month to be their on-call n8n person. New workflow — twenty-five thousand per custom workflow after launch. Full on-call retainer — fifty thousand a month for twenty-four-by-seven. White-label — half a million to let another agency resell your implementation. <break time="1s" /> The managed support plans are gold. Deliver the implementation once, collect fifteen thousand a month per client forever. Five clients and you have a seventy-five-thousand-a-month baseline.
+
+Pricing done. Next: how to onboard clients fast and consistently. See you there.

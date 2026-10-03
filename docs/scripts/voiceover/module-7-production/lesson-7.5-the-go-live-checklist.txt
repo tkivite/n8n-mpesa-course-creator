@@ -1,0 +1,23 @@
+# Lesson 7.5 : The go-live checklist
+# Target runtime: 9 min
+# Word count: ~481
+# Paste the lines below into ElevenLabs / Murf.
+# <break time="Ns" /> tags are ElevenLabs SSML.
+
+Walk through the printable go-live checklist from the docs folder. Six sections. Thirty-ish checkboxes. All of them matter.
+
+Section one: Daraja. Production app approved. Business shortcode allocated. Production Consumer Key, Secret, and Passkey received. Callback URL registered with Safaricom. If required, your VPS IP whitelisted. Go-live letter on file. <break time="1s" /> Of all of these, the one people miss is the IP whitelist. Depending on your account manager, Safaricom may require you to tell them which IP will receive callbacks before they'll approve the shortcode for production. Ask explicitly. Answer varies.
+
+Section two: infrastructure. VPS at two GB RAM minimum. Domain pointing to the IP. HTTPS cert valid and auto-renew tested — Let's Encrypt renews automatically, but verify. NTP synchronized. Timezone Africa Nairobi. Firewall closed to everything except SSH, eighty, four four three. Fail2ban installed. <break time="1s" /> The NTP one is the single most important technical check. We've talked about clock drift before. Verify with timedatectl status that time is synchronized. If "yes" — proceed.
+
+Section three: secrets. Dot env permissions six hundred. Fresh thirty-two-character encryption key, not the default. Strong n8n basic auth password. Postgres password rotated. Sandbox creds removed from env. Secrets backed up in a password manager. <break time="1s" /> Removing sandbox creds matters. You don't want a human — including yourself at two AM — accidentally hitting sandbox from the production box because an old env var was still set.
+
+Section four: pre-flight. On production credentials with a tiny real amount — one shilling. <break time="1s" /> OAuth token retrieved. STK push triggers prompt on your actual phone. You enter PIN. Callback arrives. Database row shows success with a real M-Pesa receipt number. Reconciliation workflow runs on schedule. Cancelled transaction gets marked cancelled correctly within seven minutes. <break time="1s" /> If any single step fails, STOP. Fix. Re-test. Do not proceed to launch.
+
+Section five: monitoring. Error Trigger workflow active. Postgres backup job scheduled daily. Backup restore tested at least once. Uptime monitor on your callback URL. Threshold alert on five-plus failed transactions in ten minutes.
+
+Section six: operational. On-call rotation defined — who gets paged when things break at midnight. Runbook for "callbacks not arriving" — a one-page doc the on-call person can follow without thinking. Customer support can look up a transaction by phone or receipt. Finance gets the daily report email.
+
+Section seven: compliance. Kenya's Data Protection Act twenty-nineteen applies if you process more than ten thousand records. Privacy policy mentions M-Pesa data handling. Transaction logs retention policy defined — Safaricom recommends seven years. Customer phone numbers encrypted at rest if practical. <break time="1s" /> The ODPC registration — Office of the Data Protection Commissioner — is often skipped, but required for formal businesses. Half a day of paperwork. Protects you from fines.
+
+Module seven done. You're production ready. Next up: module eight, real-world use cases. We'll build five complete integrations end to end. See you there.
